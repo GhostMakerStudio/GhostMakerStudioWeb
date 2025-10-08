@@ -6,7 +6,7 @@ const environments = {
     name: 'Development',
     baseUrl: 'http://localhost:3000',
     apiUrl: 'http://localhost:3000/api',
-    stripePublishableKey: STRIPE_PUBLISHABLE_KEY, // From .env file
+    stripePublishableKey: 'pk_test_51SFPACePGG', // Your actual test key
     aws: {
       region: 'us-east-1',
       userPoolId: 'us-east-1_DE8JEJjRR',
