@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Order Services - GhostMaker Studio</title>
+    <meta name="description" content="Order professional creative services from GhostMaker Studio">
+    <link rel="stylesheet" href="../styles/main.css">
+    <link rel="stylesheet" href="../styles/order.css">
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="nav-logo">
+                <a href="../../index.html">
+                    <h1>GhostMaker Studio</h1>
+                    <span class="tagline">Professional Creative Services</span>
+                </a>
+            </div>
+            <div class="nav-links">
+                <a href="../../index.html">Home</a>
+                <a href="../../index.html#portfolio">Portfolio</a>
+                <a href="../../index.html#services">Services</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Order Form Section -->
+    <section class="order-section">
+        <div class="container">
+            <div class="order-header">
+                <h1>Order Your Project</h1>
+                <p>Choose a service and we'll get started right away</p>
+            </div>
+
+            <div class="order-form-container">
+                <form id="orderForm" class="order-form">
+                    <!-- Service Selection -->
+                    <div class="form-group">
+                        <label>Select Service</label>
+                        <div class="service-options">
+                            <div class="service-option" data-service="flyer">
+                                <input type="radio" id="flyer" name="service" value="flyer" required>
+                                <label for="flyer">
+                                    <div class="service-card">
+                                        <div class="service-icon">🎨</div>
+                                        <h3>Flyer Design</h3>
+                                        <p>Professional flyer design for events, promotions, and announcements</p>
+                                        <div class="service-price">$5.00</div>
+                                    </div>
+                                </label>
+                            </div>
+                            <div class="service-option" data-service="video">
+                                <input type="radio" id="video" name="service" value="video" required>
+                                <label for="video">
+                                    <div class="service-card">
+                                        <div class="service-icon">🎥</div>
+                                        <h3>Video Production</h3>
+                                        <p>Complete video production with editing, effects, and multiple formats</p>
+                                        <div class="service-price">$25.00</div>
+                                    </div>
+                                </label>
+                            </div>
+                            <div class="service-option" data-service="app">
+                                <input type="radio" id="app" name="service" value="app" required>
+                                <label for="app">
+                                    <div class="service-card">
+                                        <div class="service-icon">📱</div>
+                                        <h3>Web/Mobile App</h3>
+                                        <p>Custom web and mobile applications for your business needs</p>
+                                        <div class="service-price">$250.00</div>
+                                    </div>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Project Details -->
+                    <div class="form-group">
+                        <label for="projectDetails">Project Details</label>
+                        <textarea id="projectDetails" name="projectDetails" rows="4" 
+                                placeholder="Describe your project requirements, goals, and any specific details..."></textarea>
+                    </div>
+
+                    <!-- Customer Information -->
+                    <div class="form-group">
+                        <label for="customerName">Your Name</label>
+                        <input type="text" id="customerName" name="customerName" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="customerEmail">Email Address</label>
+                        <input type="email" id="customerEmail" name="customerEmail" required>
+                    </div>
+
+                    <!-- Payment Section -->
+                    <div class="payment-section">
+                        <h3>💳 Payment Information</h3>
+                        <p class="payment-note">Secure payment processing powered by Stripe</p>
+                        
+                        <!-- Test Card Information -->
+                        <div class="test-cards">
+                            <h4>🧪 Test Cards (Safe to Use):</h4>
+                            <div class="test-card-grid">
+                                <div class="test-card success">
+                                    <strong>✅ Success:</strong><br>
+                                    <code>4242 4242 4242 4242</code>
+                                </div>
+                                <div class="test-card decline">
+                                    <strong>❌ Decline:</strong><br>
+                                    <code>4000 0000 0000 0002</code>
+                                </div>
+                            </div>
+                            <p class="test-note">Use any future expiry date (e.g., 12/25) and any 3-digit CVC (e.g., 123)</p>
+                        </div>
+
+                        <!-- Custom Payment Form -->
+                        <div class="payment-form">
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="cardNumber">Card Number</label>
+                                    <input type="text" id="cardNumber" name="cardNumber" 
+                                           placeholder="4242 4242 4242 4242" 
+                                           maxlength="19" required>
+                                </div>
+                            </div>
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="expiryDate">Expiry Date</label>
+                                    <input type="text" id="expiryDate" name="expiryDate" 
+                                           placeholder="MM/YY" 
+                                           maxlength="5" required>
+                                </div>
+                                <div class="form-group">
+                                    <label for="cvc">CVC</label>
+                                    <input type="text" id="cvc" name="cvc" 
+                                           placeholder="123" 
+                                           maxlength="4" required>
+                                </div>
+                            </div>
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="cardholderName">Cardholder Name</label>
+                                    <input type="text" id="cardholderName" name="cardholderName" 
+                                           placeholder="John Doe" required>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Order Summary -->
+                    <div class="order-summary">
+                        <h3>Order Summary</h3>
+                        <div class="summary-item">
+                            <span class="service-name">Service</span>
+                            <span class="service-price" id="summaryPrice">Select a service</span>
+                        </div>
+                        <div class="summary-total">
+                            <span>Total</span>
+                            <span id="totalPrice">$0.00</span>
+                        </div>
+                    </div>
+
+                    <!-- Submit Button -->
+                    <button type="submit" id="submitButton" class="btn btn-primary btn-large" disabled>
+                        <span id="buttonText">Select a service to continue</span>
+                        <span id="buttonLoader" class="loader" style="display: none;">Processing...</span>
+                    </button>
+
+                    <!-- Terms -->
+                    <div class="terms">
+                        <p>By placing this order, you agree to our terms of service. You'll receive email updates about your order status and can communicate directly through your order page.</p>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h3>GhostMaker Studio</h3>
+                    <p>Professional creative services delivered with excellence</p>
+                </div>
+                <div class="footer-section">
+                    <h4>Services</h4>
+                    <ul>
+                        <li>Flyer Design</li>
+                        <li>Video Production</li>
+                        <li>Web Development</li>
+                        <li>Mobile Apps</li>
+                    </ul>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2024 GhostMaker Studio. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Scripts -->
+    <script type="module" src="../components/order.js"></script>
+</body>
+</html>

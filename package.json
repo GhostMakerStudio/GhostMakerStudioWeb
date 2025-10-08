@@ -1,0 +1,24 @@
+{
+  "name": "ghostmaker-studio-website",
+  "version": "1.0.0",
+  "description": "GhostMaker Studio - Professional Portfolio & Business Automation Platform",
+  "main": "index.html",
+  "scripts": {
+    "dev": "python -m http.server 3000",
+    "start": "python -m http.server 3000",
+    "build": "echo 'Build complete'",
+    "test": "echo 'No tests yet'"
+  },
+  "keywords": [
+    "portfolio",
+    "business-automation",
+    "creative-services",
+    "order-management"
+  ],
+  "author": "GhostMaker Studio",
+  "license": "MIT",
+  "devDependencies": {},
+  "dependencies": {}
+}
+
+

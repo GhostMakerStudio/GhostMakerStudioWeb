@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Order Details - GhostMaker Studio</title>
+    <meta name="description" content="Track your order progress and communicate with GhostMaker Studio">
+    <link rel="stylesheet" href="../styles/main.css">
+    <link rel="stylesheet" href="../styles/order-details.css">
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="nav-logo">
+                <a href="../../index.html">
+                    <h1>GhostMaker Studio</h1>
+                    <span class="tagline">Professional Creative Services</span>
+                </a>
+            </div>
+            <div class="nav-links">
+                <a href="../../index.html">Home</a>
+                <a href="order.html">New Order</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Order Details Section -->
+    <section class="order-details-section">
+        <div class="container">
+            <!-- Order Header -->
+            <div class="order-header">
+                <div class="order-info">
+                    <h1>Order #<span id="orderId">Loading...</span></h1>
+                    <div class="order-meta">
+                        <span class="service-type" id="serviceType">Service</span>
+                        <span class="order-date" id="orderDate">Date</span>
+                        <span class="order-price" id="orderPrice">Price</span>
+                    </div>
+                </div>
+                <div class="order-status">
+                    <div class="status-badge" id="statusBadge">
+                        <span id="statusText">Loading...</span>
+                    </div>
+                    <div class="queue-info" id="queueInfo" style="display: none;">
+                        <p>You're #<span id="queuePosition">-</span> in queue</p>
+                        <p>Estimated start: <span id="estimatedStart">-</span></p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Order Timeline -->
+            <div class="order-timeline">
+                <h3>Order Progress</h3>
+                <div class="timeline-container" id="timelineContainer">
+                    <!-- Timeline will be populated by JavaScript -->
+                </div>
+            </div>
+
+            <!-- Order Content -->
+            <div class="order-content">
+                <div class="content-section">
+                    <h3>Project Details</h3>
+                    <div class="project-details" id="projectDetails">
+                        <!-- Project details will be loaded here -->
+                    </div>
+                </div>
+
+                <!-- Files Section -->
+                <div class="files-section">
+                    <h3>Project Files</h3>
+                    <div class="files-container" id="filesContainer">
+                        <!-- Files will be loaded here -->
+                    </div>
+                </div>
+
+                <!-- Messages Section -->
+                <div class="messages-section">
+                    <h3>Communication</h3>
+                    <div class="messages-container" id="messagesContainer">
+                        <!-- Messages will be loaded here -->
+                    </div>
+                    
+                    <!-- Message Input -->
+                    <div class="message-input">
+                        <textarea id="messageInput" placeholder="Type your message here..."></textarea>
+                        <div class="message-actions">
+                            <input type="file" id="fileInput" accept="image/*,video/*,.pdf,.doc,.docx" multiple>
+                            <label for="fileInput" class="btn btn-secondary">Attach Files</label>
+                            <button id="sendMessage" class="btn btn-primary">Send Message</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h3>GhostMaker Studio</h3>
+                    <p>Professional creative services delivered with excellence</p>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2024 GhostMaker Studio. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Scripts -->
+    <script src="../components/order-details.js"></script>
+</body>
+</html>
+

@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard - GhostMaker Studio</title>
+    <meta name="description" content="Admin dashboard for managing orders and analytics">
+    <link rel="stylesheet" href="../styles/main.css">
+    <link rel="stylesheet" href="../styles/admin-dashboard.css">
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="nav-logo">
+                <h1>GhostMaker Studio</h1>
+                <span class="tagline">Admin Dashboard</span>
+            </div>
+            <div class="nav-links">
+                <a href="../../index.html">Public Site</a>
+                <a href="#orders">Orders</a>
+                <a href="#analytics">Analytics</a>
+                <button id="logoutBtn" class="btn btn-secondary">Logout</button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Dashboard Header -->
+    <section class="dashboard-header">
+        <div class="container">
+            <div class="dashboard-stats">
+                <div class="stat-card">
+                    <div class="stat-icon">📋</div>
+                    <div class="stat-content">
+                        <h3 id="totalOrders">0</h3>
+                        <p>Total Orders</p>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon">⏳</div>
+                    <div class="stat-content">
+                        <h3 id="pendingOrders">0</h3>
+                        <p>Pending Orders</p>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon">💰</div>
+                    <div class="stat-content">
+                        <h3 id="totalRevenue">$0</h3>
+                        <p>Total Revenue</p>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon">⚡</div>
+                    <div class="stat-content">
+                        <h3 id="avgProcessingTime">0h</h3>
+                        <p>Avg Processing Time</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Main Dashboard Content -->
+    <section class="dashboard-content">
+        <div class="container">
+            <div class="dashboard-grid">
+                <!-- Orders Queue -->
+                <div class="dashboard-panel" id="ordersPanel">
+                    <div class="panel-header">
+                        <h2>Order Queue</h2>
+                        <div class="panel-actions">
+                            <button id="refreshOrders" class="btn btn-secondary">Refresh</button>
+                        </div>
+                    </div>
+                    <div class="orders-list" id="ordersList">
+                        <!-- Orders will be loaded here -->
+                    </div>
+                </div>
+
+                <!-- Performance Analytics -->
+                <div class="dashboard-panel" id="analyticsPanel">
+                    <div class="panel-header">
+                        <h2>Performance Analytics</h2>
+                        <div class="panel-actions">
+                            <select id="timeRange">
+                                <option value="7d">Last 7 Days</option>
+                                <option value="30d" selected>Last 30 Days</option>
+                                <option value="90d">Last 90 Days</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="analytics-content">
+                        <!-- Timeline Performance Chart -->
+                        <div class="chart-container">
+                            <h3>Order Timeline Performance</h3>
+                            <canvas id="timelineChart"></canvas>
+                        </div>
+
+                        <!-- Service Breakdown -->
+                        <div class="chart-container">
+                            <h3>Service Breakdown</h3>
+                            <canvas id="serviceChart"></canvas>
+                        </div>
+
+                        <!-- Bottleneck Analysis -->
+                        <div class="bottleneck-analysis">
+                            <h3>Bottleneck Analysis</h3>
+                            <div class="bottleneck-items" id="bottleneckItems">
+                                <!-- Bottleneck items will be loaded here -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Quick Actions -->
+                <div class="dashboard-panel" id="actionsPanel">
+                    <div class="panel-header">
+                        <h2>Quick Actions</h2>
+                    </div>
+                    <div class="quick-actions">
+                        <button id="startNextOrder" class="action-btn">
+                            <div class="action-icon">▶️</div>
+                            <div class="action-text">
+                                <h4>Start Next Order</h4>
+                                <p>Begin work on the next order in queue</p>
+                            </div>
+                        </button>
+                        
+                        <button id="viewAllOrders" class="action-btn">
+                            <div class="action-icon">📋</div>
+                            <div class="action-text">
+                                <h4>View All Orders</h4>
+                                <p>See complete order history</p>
+                            </div>
+                        </button>
+                        
+                        <button id="exportAnalytics" class="action-btn">
+                            <div class="action-icon">📊</div>
+                            <div class="action-text">
+                                <h4>Export Analytics</h4>
+                                <p>Download performance data</p>
+                            </div>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Order Detail Modal -->
+    <div id="orderModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Order Details</h2>
+                <button class="modal-close">&times;</button>
+            </div>
+            <div class="modal-body" id="orderModalBody">
+                <!-- Order details will be loaded here -->
+            </div>
+            <div class="modal-footer">
+                <button id="updateOrderStatus" class="btn btn-primary">Update Status</button>
+                <button id="sendMessage" class="btn btn-secondary">Send Message</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h3>GhostMaker Studio</h3>
+                    <p>Admin Dashboard</p>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2024 GhostMaker Studio. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="../components/admin-dashboard.js"></script>
+</body>
+</html>
+
