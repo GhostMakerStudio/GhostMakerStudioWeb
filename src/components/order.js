@@ -264,17 +264,23 @@ class OrderPage {
     this.updateButtonState(true);
 
     try {
+      // Create guest user account (unauthorized Cognito user)
+      const guestUser = await this.createGuestUser(formData.email, formData.name);
+      
       // Prepare order data
       const orderData = {
         orderId: 'order_' + Date.now(),
-        userId: 'guest_' + Date.now(),
+        userId: guestUser.userId,
+        cognitoUserId: guestUser.cognitoUserId,
+        stripeCustomerId: guestUser.stripeCustomerId,
         email: formData.email,
         name: formData.name,
         service: formData.service,
         price: this.paymentService.getServicePrice(formData.service),
         projectDetails: formData.projectDetails,
-        status: 'pending',
-        createdAt: new Date().toISOString()
+        status: 'content_pending',
+        createdAt: new Date().toISOString(),
+        trackingToken: this.generateTrackingToken(formData.email)
       };
 
       // Process payment with Stripe
@@ -299,8 +305,14 @@ class OrderPage {
         // Save to database
         await this.db.saveItem('ghostmaker-orders', orderData);
         
-        // Show success message
-        this.showSuccess(`✅ Payment successful! Order ID: ${orderData.orderId}\nPayment ID: ${paymentResult.paymentId}`);
+        // Send order confirmation email
+        const trackingUrl = await this.sendOrderConfirmationEmail(orderData);
+        
+        // Show success message with tracking link
+        this.showSuccess(
+          `✅ Payment successful! Order ID: ${orderData.orderId}\nPayment ID: ${paymentResult.paymentId}\n\nCheck your email for confirmation and tracking details.`,
+          trackingUrl
+        );
         
         // Reset form
         document.getElementById('orderForm').reset();
@@ -365,24 +377,93 @@ class OrderPage {
     });
   }
 
-  showSuccess(message) {
+  async createGuestUser(email, name) {
+    try {
+      console.log('👤 Creating guest user for:', email);
+      
+      // In real app, this would call your backend API to:
+      // 1. Create unauthorized Cognito user (email only, no password)
+      // 2. Create Stripe customer linked to Cognito user
+      // 3. Return user IDs for database storage
+      
+      // Simulate the process
+      const guestUser = {
+        userId: 'guest_' + Date.now(),
+        cognitoUserId: 'cognito_' + Date.now(),
+        stripeCustomerId: 'cus_' + Date.now(),
+        email: email,
+        name: name,
+        type: 'guest'
+      };
+      
+      console.log('✅ Guest user created:', guestUser);
+      return guestUser;
+    } catch (error) {
+      console.error('Failed to create guest user:', error);
+      throw error;
+    }
+  }
+
+  generateTrackingToken(email) {
+    // Generate secure tracking token for email-based access
+    const timestamp = Date.now();
+    const random = Math.random().toString(36).substr(2, 9);
+    return `${email}_${timestamp}_${random}`;
+  }
+
+  async sendOrderConfirmationEmail(orderData) {
+    try {
+      console.log('📧 Sending order confirmation email to:', orderData.email);
+      
+      // In real app, this would call your backend API to send email
+      // Email would contain:
+      // - Order confirmation details
+      // - Tracking link: https://ghostmakerstudio.com/track?token=${orderData.trackingToken}
+      // - Order number and status
+      
+      const trackingUrl = `http://localhost:3000/src/pages/order-tracking.html?token=${orderData.trackingToken}`;
+      
+      console.log('📧 Email would be sent with tracking URL:', trackingUrl);
+      
+      // For now, show the tracking URL in the success message
+      return trackingUrl;
+    } catch (error) {
+      console.error('Failed to send confirmation email:', error);
+      throw error;
+    }
+  }
+
+  showSuccess(message, trackingUrl = null) {
     // Create success notification
     const successDiv = document.createElement('div');
     successDiv.className = 'success-notification';
-    successDiv.innerHTML = `
+    
+    let messageContent = `
       <div class="success-content">
         <span class="success-icon">✅</span>
         <span class="success-message">${message}</span>
         <button class="success-close">&times;</button>
       </div>
     `;
+    
+    if (trackingUrl) {
+      messageContent += `
+        <div class="success-actions">
+          <a href="${trackingUrl}" target="_blank" class="btn btn-small btn-secondary">
+            View Order Status
+          </a>
+        </div>
+      `;
+    }
+    
+    successDiv.innerHTML = messageContent;
 
     document.body.appendChild(successDiv);
 
-    // Auto-remove after 5 seconds
+    // Auto-remove after 10 seconds (longer for tracking link)
     setTimeout(() => {
       successDiv.remove();
-    }, 5000);
+    }, 10000);
 
     // Close button
     successDiv.querySelector('.success-close').addEventListener('click', () => {

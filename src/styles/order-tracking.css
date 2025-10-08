@@ -1,0 +1,289 @@
+/* Order Tracking Styles */
+.tracking-section {
+  padding: 60px 0;
+  background: linear-gradient(135deg, #0f172a, #1e293b);
+  min-height: 100vh;
+}
+
+.tracking-header {
+  text-align: center;
+  margin-bottom: 40px;
+}
+
+.tracking-header h1 {
+  font-size: 2.5rem;
+  color: #f8fafc;
+  margin-bottom: 10px;
+}
+
+.tracking-header p {
+  color: #94a3b8;
+  font-size: 1.1rem;
+}
+
+.tracking-form {
+  max-width: 500px;
+  margin: 0 auto 40px;
+  background: linear-gradient(135deg, #1f2937, #111827);
+  border: 1px solid #374151;
+  border-radius: 12px;
+  padding: 32px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.tracking-form .form-group {
+  margin-bottom: 24px;
+}
+
+.tracking-form label {
+  display: block;
+  color: #f8fafc;
+  font-weight: 500;
+  margin-bottom: 8px;
+}
+
+.tracking-form input {
+  width: 100%;
+  padding: 12px 16px;
+  background: rgba(17, 24, 39, 0.8);
+  border: 1px solid #374151;
+  border-radius: 6px;
+  color: #f8fafc;
+  font-size: 16px;
+  transition: all 0.3s ease;
+}
+
+.tracking-form input:focus {
+  border-color: #8b5cf6;
+  box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.1);
+  outline: none;
+}
+
+.tracking-form input::placeholder {
+  color: #6b7280;
+}
+
+/* Order Results */
+.order-results {
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+.order-results.hidden {
+  display: none;
+}
+
+.orders-header {
+  text-align: center;
+  margin-bottom: 32px;
+}
+
+.orders-header h3 {
+  color: #f8fafc;
+  font-size: 1.8rem;
+  margin-bottom: 8px;
+}
+
+.orders-header p {
+  color: #94a3b8;
+}
+
+.orders-list {
+  display: grid;
+  gap: 20px;
+}
+
+/* Order Cards */
+.order-card {
+  background: linear-gradient(135deg, #1f2937, #111827);
+  border: 1px solid #374151;
+  border-radius: 12px;
+  padding: 24px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.order-card:hover {
+  border-color: #8b5cf6;
+  box-shadow: 0 4px 12px rgba(139, 92, 246, 0.2);
+  transform: translateY(-2px);
+}
+
+.order-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+.order-id {
+  color: #8b5cf6;
+  font-weight: 600;
+  font-family: 'Courier New', monospace;
+  font-size: 1.1rem;
+}
+
+.order-status {
+  padding: 6px 12px;
+  border-radius: 20px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.order-status.content-pending {
+  background: rgba(245, 158, 11, 0.2);
+  color: #f59e0b;
+}
+
+.order-status.first-draft-done {
+  background: rgba(59, 130, 246, 0.2);
+  color: #3b82f6;
+}
+
+.order-status.order-complete {
+  background: rgba(16, 185, 129, 0.2);
+  color: #10b981;
+}
+
+.order-info {
+  display: grid;
+  grid-template-columns: 1fr auto auto;
+  gap: 16px;
+  margin-bottom: 20px;
+  align-items: center;
+}
+
+.order-service {
+  color: #f8fafc;
+  font-weight: 500;
+  font-size: 1.1rem;
+}
+
+.order-amount {
+  color: #10b981;
+  font-weight: 600;
+  font-size: 1.1rem;
+}
+
+.order-date {
+  color: #94a3b8;
+  font-size: 0.9rem;
+}
+
+/* Timeline Preview */
+.order-timeline {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.timeline-step {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 8px;
+  border-radius: 12px;
+  font-size: 0.8rem;
+  transition: all 0.3s ease;
+}
+
+.timeline-step.completed {
+  background: rgba(16, 185, 129, 0.2);
+  color: #10b981;
+}
+
+.timeline-step.pending {
+  background: rgba(55, 65, 81, 0.5);
+  color: #6b7280;
+}
+
+.step-icon {
+  font-size: 0.9rem;
+}
+
+.step-label {
+  font-weight: 500;
+}
+
+/* No Orders State */
+.no-orders {
+  text-align: center;
+  background: linear-gradient(135deg, #1f2937, #111827);
+  border: 1px solid #374151;
+  border-radius: 12px;
+  padding: 40px;
+}
+
+.no-orders h3 {
+  color: #f8fafc;
+  font-size: 1.5rem;
+  margin-bottom: 16px;
+}
+
+.no-orders p {
+  color: #94a3b8;
+  margin-bottom: 24px;
+}
+
+.no-orders-actions {
+  display: flex;
+  gap: 16px;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+/* Error Message */
+.error-message {
+  text-align: center;
+  background: linear-gradient(135deg, #1f2937, #111827);
+  border: 1px solid #ef4444;
+  border-radius: 12px;
+  padding: 40px;
+}
+
+.error-message h3 {
+  color: #ef4444;
+  font-size: 1.5rem;
+  margin-bottom: 16px;
+}
+
+.error-message p {
+  color: #94a3b8;
+  margin-bottom: 24px;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .tracking-form {
+    margin: 0 16px 40px;
+    padding: 24px;
+  }
+  
+  .order-info {
+    grid-template-columns: 1fr;
+    gap: 8px;
+  }
+  
+  .order-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+  
+  .order-timeline {
+    flex-direction: column;
+    gap: 4px;
+  }
+  
+  .timeline-step {
+    justify-content: flex-start;
+  }
+  
+  .no-orders-actions {
+    flex-direction: column;
+    align-items: center;
+  }
+}
