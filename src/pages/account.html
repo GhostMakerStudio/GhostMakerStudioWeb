@@ -96,22 +96,19 @@
             <div class="modal-body">
                 <form id="paymentMethodForm">
                     <div class="form-group">
-                        <label for="cardNumber">Card Number</label>
-                        <input type="text" id="cardNumber" placeholder="4242 4242 4242 4242" required>
-                    </div>
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label for="expiryDate">Expiry Date</label>
-                            <input type="text" id="expiryDate" placeholder="MM/YY" required>
-                        </div>
-                        <div class="form-group">
-                            <label for="cvc">CVC</label>
-                            <input type="text" id="cvc" placeholder="123" required>
-                        </div>
-                    </div>
-                    <div class="form-group">
                         <label for="cardholderName">Cardholder Name</label>
                         <input type="text" id="cardholderName" placeholder="John Doe" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="cardholderEmail">Email</label>
+                        <input type="email" id="cardholderEmail" placeholder="john@example.com" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Card Details</label>
+                        <div id="card-element" class="stripe-element">
+                            <!-- Stripe Elements will be injected here -->
+                        </div>
+                        <div id="card-errors" class="error-message"></div>
                     </div>
                     <button type="submit" class="btn btn-primary">Add Payment Method</button>
                 </form>

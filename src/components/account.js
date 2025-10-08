@@ -19,6 +19,41 @@ class AccountManager {
     // Load account data
     await this.loadAccountData();
     this.setupEventListeners();
+    this.setupStripeElements();
+  }
+
+  setupStripeElements() {
+    // Create Stripe Elements
+    const elements = this.stripe.elements();
+    
+    // Create card element
+    this.cardElement = elements.create('card', {
+      style: {
+        base: {
+          fontSize: '16px',
+          color: '#f8fafc',
+          '::placeholder': {
+            color: '#94a3b8',
+          },
+        },
+        invalid: {
+          color: '#ef4444',
+        },
+      },
+    });
+
+    // Mount the card element
+    this.cardElement.mount('#card-element');
+
+    // Handle real-time validation errors
+    this.cardElement.on('change', ({error}) => {
+      const displayError = document.getElementById('card-errors');
+      if (error) {
+        displayError.textContent = error.message;
+      } else {
+        displayError.textContent = '';
+      }
+    });
   }
 
   async loadAccountData() {
@@ -91,18 +126,13 @@ class AccountManager {
 
   async addPaymentMethod(formData) {
     try {
-      // Create payment method with Stripe
+      // Create payment method using Stripe Elements
       const { paymentMethod, error } = await this.stripe.createPaymentMethod({
         type: 'card',
-        card: {
-          number: formData.cardNumber,
-          exp_month: parseInt(formData.expiryDate.split('/')[0]),
-          exp_year: parseInt('20' + formData.expiryDate.split('/')[1]),
-          cvc: formData.cvc,
-        },
+        card: this.cardElement, // Use Stripe Elements
         billing_details: {
           name: formData.cardholderName,
-          email: formData.email,
+          email: formData.cardholderEmail,
         },
       });
 
@@ -258,11 +288,8 @@ class AccountManager {
 
   async handleAddPaymentMethod() {
     const formData = {
-      cardNumber: document.getElementById('cardNumber').value,
-      expiryDate: document.getElementById('expiryDate').value,
-      cvc: document.getElementById('cvc').value,
       cardholderName: document.getElementById('cardholderName').value,
-      email: document.getElementById('userEmail').textContent
+      cardholderEmail: document.getElementById('cardholderEmail').value
     };
 
     const result = await this.addPaymentMethod(formData);

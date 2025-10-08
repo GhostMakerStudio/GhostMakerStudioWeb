@@ -300,6 +300,29 @@
   gap: 16px;
 }
 
+/* Stripe Elements Styling */
+.stripe-element {
+  background: rgba(17, 24, 39, 0.8);
+  border: 1px solid #374151;
+  border-radius: 6px;
+  padding: 12px 16px;
+  margin-bottom: 16px;
+  transition: all 0.3s ease;
+}
+
+.stripe-element:focus {
+  border-color: #8b5cf6;
+  box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.1);
+  outline: none;
+}
+
+.error-message {
+  color: #ef4444;
+  font-size: 0.9rem;
+  margin-top: 8px;
+  min-height: 20px;
+}
+
 /* Responsive Design */
 @media (max-width: 768px) {
   .account-dashboard {
