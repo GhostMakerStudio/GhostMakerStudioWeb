@@ -6,7 +6,7 @@ const environments = {
     name: 'Development',
     baseUrl: 'http://localhost:3000',
     apiUrl: 'http://localhost:3000/api',
-    stripePublishableKey: process.env.STRIPE_PUBLISHABLE_KEY || 'pk_test_...',
+    stripePublishableKey: 'pk_test_51SFPAC...', // Your actual test key
     aws: {
       region: 'us-east-1',
       userPoolId: 'us-east-1_DE8JEJjRR',
@@ -26,7 +26,7 @@ const environments = {
     name: 'Staging',
     baseUrl: 'https://dev.ghostmakerstudio.com',
     apiUrl: 'https://dev-api.ghostmakerstudio.com',
-    stripePublishableKey: process.env.STRIPE_PUBLISHABLE_KEY || 'pk_test_...',
+    stripePublishableKey: 'pk_test_51SFPAC...', // Your actual test key
     aws: {
       region: 'us-east-1',
       userPoolId: 'us-east-1_DE8JEJjRR',
@@ -46,7 +46,7 @@ const environments = {
     name: 'Production',
     baseUrl: 'https://ghostmakerstudio.com',
     apiUrl: 'https://api.ghostmakerstudio.com',
-    stripePublishableKey: process.env.STRIPE_PUBLISHABLE_KEY || 'pk_live_...',
+    stripePublishableKey: 'pk_live_...', // Production key
     aws: {
       region: 'us-east-1',
       userPoolId: 'us-east-1_DE8JEJjRR',
