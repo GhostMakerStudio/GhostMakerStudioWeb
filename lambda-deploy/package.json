@@ -1,10 +1,9 @@
 {
-  "name": "ghostmaker-api-lambda",
+  "name": "ghostmaker-api-lambda-simple",
   "version": "1.0.0",
-  "description": "GhostMaker Studio API Lambda Function",
-  "main": "lambda-server.js",
+  "description": "Simple Lambda function for GhostMaker Studio API",
+  "main": "lambda-server-simple.js",
   "dependencies": {
-    "aws-sdk": "^2.1692.0",
-    "sharp": "^0.34.4"
+    "aws-sdk": "^2.1691.0"
   }
 }

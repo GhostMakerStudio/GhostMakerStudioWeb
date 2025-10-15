@@ -1,17 +1,13 @@
-// Lambda-compatible version of server.js
+// Simple Lambda function for GhostMaker Studio API (without sharp)
 // This will handle API requests from your live website
 
 const AWS = require('aws-sdk');
-const sharp = require('sharp');
 
-// Configure AWS
+// Configure AWS (use IAM role credentials)
 AWS.config.update({
-  region: process.env.AWS_REGION || 'us-east-1',
-  accessKeyId: process.env.AWS_ACCESS_KEY_ID,
-  secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY
+  region: process.env.AWS_REGION || 'us-east-1'
 });
 
-const s3 = new AWS.S3();
 const dynamodb = new AWS.DynamoDB.DocumentClient();
 
 // DynamoDB table names
@@ -20,6 +16,7 @@ const MEDIA_TABLE = process.env.DYNAMODB_MEDIA_TABLE || 'ghostmaker-media';
 
 exports.handler = async (event, context) => {
   console.log('🚀 Lambda API Handler:', event.path, event.httpMethod);
+  console.log('📊 Event:', JSON.stringify(event, null, 2));
   
   // CORS headers
   const headers = {
@@ -62,7 +59,9 @@ exports.handler = async (event, context) => {
       headers,
       body: JSON.stringify({
         success: false,
-        error: 'API endpoint not found'
+        error: 'API endpoint not found',
+        path: event.path,
+        method: event.httpMethod
       })
     };
 
