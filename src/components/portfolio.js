@@ -48,11 +48,16 @@ class PortfolioGallery {
           this.gridLayout = {
             width: gridLayoutItem.layout.width || 3,
             height: gridLayoutItem.layout.height || 3,
-            positions: gridLayoutItem.layout.positions || {}
+            positions: gridLayoutItem.layout.positions || {},
+            sectionTitle: gridLayoutItem.layout.sectionTitle || 'Our Work'
           };
+          
+          // Update the section title on the page
+          this.updateSectionTitle(this.gridLayout.sectionTitle);
         } else {
           console.log('⚠️ No grid layout found, using default');
-          this.gridLayout = { width: 3, height: 3, positions: {} };
+          this.gridLayout = { width: 3, height: 3, positions: {}, sectionTitle: 'Our Work' };
+          this.updateSectionTitle('Our Work');
         }
         
         // Filter out grid_layout and other non-project items
@@ -90,6 +95,15 @@ class PortfolioGallery {
       }
       
       this.projects = [];
+    }
+  }
+
+  // 📝 UPDATE SECTION TITLE
+  updateSectionTitle(title) {
+    const sectionTitle = document.querySelector('#portfolio .section-title');
+    if (sectionTitle) {
+      sectionTitle.textContent = title;
+      console.log('📝 Updated section title to:', title);
     }
   }
 
