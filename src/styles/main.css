@@ -311,30 +311,11 @@ section {
   padding-top: 100px; /* Add padding to account for fixed navbar */
 }
 
-.portfolio-grid {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 20px;
-  margin-top: 20px;
-  justify-content: center;
-}
+/* Removed old flex-based portfolio grid - using new grid system below */
 
-.portfolio-item {
-  background: #2a2a2a;
-  border: 1px solid #444;
-  border-radius: 12px;
-  padding: 20px;
-  transition: all 0.3s ease;
-  cursor: pointer;
-  width: 350px;
-  max-width: 100%;
-}
+/* Removed old portfolio-item styles - using new gallery styles below */
 
-.portfolio-item:hover {
-  border-color: #00d4aa;
-  transform: translateY(-2px);
-  box-shadow: 0 4px 20px rgba(0, 212, 170, 0.2);
-}
+/* Removed old hover styles - using new gallery styles below */
 
 .portfolio-cover {
   width: 100%;
