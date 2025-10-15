@@ -1,0 +1,2 @@
+Deployment test - created at: 2025-10-15 20:15:00
+This file should appear on ghostmakerstudio.com if Amplify is working.

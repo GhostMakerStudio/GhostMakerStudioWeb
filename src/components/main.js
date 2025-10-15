@@ -55,9 +55,20 @@ class GhostMakerStudio {
 
   async fetchPortfolioData() {
     try {
+      console.log('🔄 [MAIN.JS] Fetching portfolio data from API Gateway...');
+      console.log('🌐 [MAIN.JS] API URL:', 'https://o7jiy71lw3.execute-api.us-east-1.amazonaws.com/prod/api/projects');
+      console.log('📅 [MAIN.JS] Timestamp:', new Date().toISOString());
+      
       // Fetch real portfolio data from your API Gateway
       const response = await fetch('https://o7jiy71lw3.execute-api.us-east-1.amazonaws.com/prod/api/projects');
+      
+      console.log('📡 [MAIN.JS] Response received:');
+      console.log('  - Status:', response.status);
+      console.log('  - Status Text:', response.statusText);
+      console.log('  - Headers:', Object.fromEntries(response.headers.entries()));
+      
       const data = await response.json();
+      console.log('📊 [MAIN.JS] Parsed JSON data:', data);
       
       if (data.success && data.projects) {
         console.log('📡 Loaded', data.projects.length, 'projects from API');

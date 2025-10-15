@@ -5,6 +5,8 @@ class PortfolioGallery {
     this.currentProject = null;
     this.imageCache = new Map();
     this.gridLayout = { width: 3, height: 3 };
+    console.log('🚀 [DEBUG] PortfolioGallery constructor called - Updated version loaded!');
+    console.log('📅 [DEBUG] Loaded at:', new Date().toISOString());
   }
 
   // 🚀 INITIALIZE PORTFOLIO
@@ -19,8 +21,18 @@ class PortfolioGallery {
   async loadProjects() {
     try {
       console.log('🔄 Loading projects from API Gateway...');
+      console.log('🌐 API URL:', 'https://o7jiy71lw3.execute-api.us-east-1.amazonaws.com/prod/api/projects');
+      console.log('📅 Timestamp:', new Date().toISOString());
+      
       const response = await fetch('https://o7jiy71lw3.execute-api.us-east-1.amazonaws.com/prod/api/projects');
+      
+      console.log('📡 Response received:');
+      console.log('  - Status:', response.status);
+      console.log('  - Status Text:', response.statusText);
+      console.log('  - Headers:', Object.fromEntries(response.headers.entries()));
+      
       const data = await response.json();
+      console.log('📊 Parsed JSON data:', data);
       
       if (data.success && data.projects) {
         console.log('📡 Response status: 200');
@@ -59,6 +71,24 @@ class PortfolioGallery {
       }
     } catch (error) {
       console.error('❌ Failed to load projects:', error);
+      console.error('❌ Error details:');
+      console.error('  - Error type:', error.constructor.name);
+      console.error('  - Error message:', error.message);
+      console.error('  - Error stack:', error.stack);
+      
+      // Try to get more details about the fetch error
+      if (error.name === 'TypeError' && error.message.includes('fetch')) {
+        console.error('🌐 Network/Fetch Error Details:');
+        console.error('  - This might be a CORS issue or network problem');
+        console.error('  - Check if the API Gateway URL is accessible');
+      }
+      
+      if (error.name === 'SyntaxError' && error.message.includes('JSON')) {
+        console.error('📄 JSON Parse Error Details:');
+        console.error('  - The response is not valid JSON');
+        console.error('  - This usually means the server returned HTML (404 page) instead of JSON');
+      }
+      
       this.projects = [];
     }
   }
