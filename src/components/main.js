@@ -55,8 +55,8 @@ class GhostMakerStudio {
 
   async fetchPortfolioData() {
     try {
-      // Fetch real portfolio data from your API
-      const response = await fetch('/api/projects');
+      // Fetch real portfolio data from your API Gateway
+      const response = await fetch('https://o7jiy71lw3.execute-api.us-east-1.amazonaws.com/prod/api/projects');
       const data = await response.json();
       
       if (data.success && data.projects) {

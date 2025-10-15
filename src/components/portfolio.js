@@ -19,7 +19,7 @@ class PortfolioGallery {
   async loadProjects() {
     try {
       console.log('🔄 Loading projects...');
-      const response = await fetch('/api/projects');
+      const response = await fetch('https://o7jiy71lw3.execute-api.us-east-1.amazonaws.com/prod/api/projects');
       const data = await response.json();
       
       if (data.success && data.projects) {

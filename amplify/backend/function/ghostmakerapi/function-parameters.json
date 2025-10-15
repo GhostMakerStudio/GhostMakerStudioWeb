@@ -1,0 +1,21 @@
+{
+  "functionName": "ghostmakerapi",
+  "runtime": "nodejs18.x",
+  "handler": "index.handler",
+  "timeout": 30,
+  "memorySize": 512,
+  "environmentVariables": {
+    "PROJECTS_TABLE": "ghostmaker-projects",
+    "MEDIA_TABLE": "ghostmaker-media",
+    "AWS_REGION": "us-east-1"
+  },
+  "permissions": {
+    "api": [
+      {
+        "name": "ghostmakerapi",
+        "path": "/api/*",
+        "methods": ["GET", "POST", "PUT", "DELETE", "OPTIONS"]
+      }
+    ]
+  }
+}

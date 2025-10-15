@@ -1,0 +1,49 @@
+type Query {
+  getProjects: [Project]
+  getProject(id: ID!): Project
+}
+
+type Mutation {
+  createProject(input: ProjectInput!): Project
+  updateProject(id: ID!, input: ProjectInput!): Project
+  deleteProject(id: ID!): Boolean
+}
+
+type Project {
+  id: ID!
+  title: String!
+  description: String
+  coverImage: String
+  content: [MediaItem]
+  status: String
+  createdAt: AWSDateTime
+  updatedAt: AWSDateTime
+}
+
+type MediaItem {
+  type: String!
+  url: String!
+  thumbnailUrl: String
+  alt: String
+  quality: String
+  mediaId: ID
+  position: Int
+}
+
+input ProjectInput {
+  title: String!
+  description: String
+  coverImage: String
+  content: [MediaItemInput]
+  status: String
+}
+
+input MediaItemInput {
+  type: String!
+  url: String!
+  thumbnailUrl: String
+  alt: String
+  quality: String
+  mediaId: ID
+  position: Int
+}

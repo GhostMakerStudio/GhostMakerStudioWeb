@@ -1,0 +1,7 @@
+{
+  "httpMethod": "GET",
+  "path": "/api/projects",
+  "headers": {},
+  "queryStringParameters": null,
+  "body": null
+}
