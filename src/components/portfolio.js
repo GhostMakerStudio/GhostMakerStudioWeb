@@ -18,7 +18,7 @@ class PortfolioGallery {
   // 📡 LOAD PROJECTS (EXACT COPY FROM ADMIN PANEL)
   async loadProjects() {
     try {
-      console.log('🔄 Loading projects...');
+      console.log('🔄 Loading projects from API Gateway...');
       const response = await fetch('https://o7jiy71lw3.execute-api.us-east-1.amazonaws.com/prod/api/projects');
       const data = await response.json();
       
