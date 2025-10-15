@@ -1,27 +1,18 @@
 version: 1
-backend:
-  phases:
-    build:
-      commands:
-        - '# Execute Amplify CLI with the helper script'
-        - amplifyPush --simple
 frontend:
   phases:
     preBuild:
       commands:
-        - echo Installing dependencies...
-        - npm install
+        - echo 'Pre-build phase - Static site deployment'
     build:
       commands:
-        - echo Build started on `date`
-        - echo Building the React app...
-        - npm run build
+        - echo 'Build started on' `date`
+        - echo 'Static HTML site - no build needed'
+        - echo 'Deploying all files...'
   artifacts:
     baseDirectory: /
     files:
       - '**/*'
+    name: ghostmaker-studio-$(date +%Y-%m-%d-%H-%M-%S)
   cache:
-    paths:
-      - node_modules/**/*
-      - src/**/*
-      - public/**/*
+    paths: []
