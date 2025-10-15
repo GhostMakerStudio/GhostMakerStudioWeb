@@ -38,7 +38,7 @@ const PaymentService = {
     return { isValid: errors.length === 0, errors };
   },
   
-  // Real Stripe API integration with custom form
+  // Real Stripe API integration with backend
   async processPayment(paymentData) {
     try {
       console.log('💳 Processing REAL Stripe payment:', paymentData);
@@ -48,10 +48,15 @@ const PaymentService = {
         throw new Error('Stripe.js not loaded');
       }
       
-      const stripe = Stripe('pk_test_51SFPAcEPGGa8C63UYWZuluhLjM0xbDs4zcWRWrBJgNjrwwYAsnlrXSBrHA38GosIhO7tvi9GCkPK3fcJyD2k6xNE00EmSS90OU');
+      // Use config to get the right key for the environment
+      const publishableKey = window.StripeConfig ? 
+        window.StripeConfig.getPublishableKey() : 
+        'pk_test_51SFPAcEPGGa8C63UYWZuluhLjM0xbDs4zcWRWrBJgNjrwwYAsnlrXSBrHA38GosIhO7tvi9GCkPK3fcJyD2k6xNE00EmSS90OU';
       
-      // Create PaymentMethod from your custom form data
-      const { paymentMethod, error } = await stripe.createPaymentMethod({
+      const stripe = Stripe(publishableKey);
+      
+      // Step 1: Create PaymentMethod from your custom form data
+      const { paymentMethod, error: pmError } = await stripe.createPaymentMethod({
         type: 'card',
         card: {
           number: paymentData.cardNumber,
@@ -65,15 +70,52 @@ const PaymentService = {
         },
       });
 
-      if (error) {
-        throw new Error(error.message);
+      if (pmError) {
+        throw new Error(pmError.message);
       }
 
       console.log('✅ Stripe PaymentMethod created:', paymentMethod.id);
       
-      // For now, we'll simulate the PaymentIntent creation
-      // In production, this would call your backend API
-      const paymentIntentId = 'pi_test_' + Date.now();
+      // Step 2: Create PaymentIntent using backend API
+      const paymentIntentResponse = await fetch('/api/create-payment-intent', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          amount: paymentData.amount,
+          currency: paymentData.currency || 'usd',
+          metadata: paymentData.metadata || {}
+        })
+      });
+
+      const { clientSecret, paymentIntentId, error: piError } = await paymentIntentResponse.json();
+
+      if (piError) {
+        throw new Error(piError);
+      }
+
+      console.log('✅ PaymentIntent created:', paymentIntentId);
+      
+      // Step 3: Confirm PaymentIntent with PaymentMethod
+      const confirmResponse = await fetch('/api/confirm-payment', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          paymentIntentId: paymentIntentId,
+          paymentMethodId: paymentMethod.id
+        })
+      });
+
+      const confirmResult = await confirmResponse.json();
+
+      if (!confirmResult.success) {
+        throw new Error(confirmResult.error || 'Payment confirmation failed');
+      }
+
+      console.log('✅ Payment confirmed successfully:', paymentIntentId);
       
       return {
         success: true,
@@ -81,7 +123,7 @@ const PaymentService = {
         paymentMethodId: paymentMethod.id,
         amount: paymentData.amount,
         currency: paymentData.currency || 'usd',
-        status: 'succeeded'
+        status: confirmResult.status || 'succeeded'
       };
     } catch (error) {
       console.error('❌ Stripe payment failed:', error);
@@ -292,7 +334,13 @@ class OrderPage {
           orderId: orderData.orderId,
           service: formData.service,
           email: formData.email
-        }
+        },
+        // Include form data for payment method creation
+        cardNumber: formData.cardNumber,
+        expiryDate: formData.expiryDate,
+        cvc: formData.cvc,
+        cardholderName: formData.cardholderName,
+        email: formData.email
       });
 
       if (paymentResult.success) {

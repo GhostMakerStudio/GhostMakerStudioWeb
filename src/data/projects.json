@@ -1,0 +1,91 @@
+{
+  "projects": [
+    {
+      "id": "startup-bizdev",
+      "title": "StartUp BizDev",
+      "description": "Complete branding and marketing materials for a tech startup",
+      "coverImage": "https://ghostmaker-studio-media.s3.amazonaws.com/projects/startup-bizdev/cover.jpg",
+      "content": [
+        {
+          "type": "image",
+          "url": "https://ghostmaker-studio-media.s3.amazonaws.com/projects/startup-bizdev/logo-design.jpg",
+          "alt": "Logo Design"
+        },
+        {
+          "type": "image", 
+          "url": "https://ghostmaker-studio-media.s3.amazonaws.com/projects/startup-bizdev/business-cards.jpg",
+          "alt": "Business Cards"
+        },
+        {
+          "type": "image",
+          "url": "https://ghostmaker-studio-media.s3.amazonaws.com/projects/startup-bizdev/flyer-design.jpg",
+          "alt": "Marketing Flyer"
+        }
+      ],
+      "appLinks": {
+        "android": "https://play.google.com/store/apps/details?id=com.startup.bizdev",
+        "ios": null
+      },
+      "tags": ["branding", "design", "startup"],
+      "date": "2024-01-15"
+    },
+    {
+      "id": "rave-christmas",
+      "title": "How the Rave Stole Christmas",
+      "description": "Event branding and promotional materials for a holiday rave",
+      "coverImage": "https://ghostmaker-studio-media.s3.amazonaws.com/projects/rave-christmas/cover.jpg",
+      "content": [
+        {
+          "type": "image",
+          "url": "https://ghostmaker-studio-media.s3.amazonaws.com/projects/rave-christmas/poster.jpg",
+          "alt": "Event Poster"
+        },
+        {
+          "type": "video",
+          "url": "https://ghostmaker-studio-media.s3.amazonaws.com/projects/rave-christmas/promo-video.mp4",
+          "alt": "Promotional Video"
+        },
+        {
+          "type": "image",
+          "url": "https://ghostmaker-studio-media.s3.amazonaws.com/projects/rave-christmas/social-media.jpg",
+          "alt": "Social Media Graphics"
+        }
+      ],
+      "appLinks": null,
+      "tags": ["event", "rave", "graphics"],
+      "date": "2023-12-01"
+    },
+    {
+      "id": "christian-daily-thoughts",
+      "title": "Christian Daily Thoughts",
+      "description": "Mobile app for daily Christian inspiration and devotionals",
+      "coverImage": "https://ghostmaker-studio-media.s3.amazonaws.com/projects/christian-daily-thoughts/cover.jpg",
+      "content": [
+        {
+          "type": "image",
+          "url": "https://ghostmaker-studio-media.s3.amazonaws.com/projects/christian-daily-thoughts/app-screens.jpg",
+          "alt": "App Screenshots"
+        },
+        {
+          "type": "video",
+          "url": "https://ghostmaker-studio-media.s3.amazonaws.com/projects/christian-daily-thoughts/app-demo.mp4",
+          "alt": "App Demo Video"
+        }
+      ],
+      "appLinks": {
+        "android": "https://play.google.com/store/apps/details?id=com.christian.dailythoughts",
+        "ios": null
+      },
+      "tags": ["mobile", "app", "christian"],
+      "date": "2024-02-20"
+    }
+  ]
+}
+
+
+
+
+
+
+
+

@@ -1,0 +1,18 @@
+{
+  "name": "ghostmaker-lambda-processors",
+  "version": "1.0.0",
+  "description": "AWS Lambda functions for media processing",
+  "main": "index.js",
+  "scripts": {
+    "deploy-image": "zip -r imageProcessor.zip imageProcessor.js node_modules/",
+    "deploy-video": "zip -r videoProcessor.zip videoProcessor.js node_modules/"
+  },
+  "dependencies": {
+    "aws-sdk": "^2.1500.0",
+    "sharp": "^0.33.0"
+  },
+  "engines": {
+    "node": ">=18.x"
+  }
+}
+

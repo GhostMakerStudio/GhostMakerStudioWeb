@@ -10,8 +10,12 @@ class AccountManager {
   }
 
   async init() {
-    // Initialize Stripe
-    this.stripe = Stripe('pk_test_51SFPAcEPGGa8C63UYWZuluhLjM0xbDs4zcWRWrBJgNjrwwYAsnlrXSBrHA38GosIhO7tvi9GCkPK3fcJyD2k6xNE00EmSS90OU');
+    // Initialize Stripe with environment-based key
+    const publishableKey = window.StripeConfig ? 
+      window.StripeConfig.getPublishableKey() : 
+      'pk_test_51SFPAcEPGGa8C63UYWZuluhLjM0xbDs4zcWRWrBJgNjrwwYAsnlrXSBrHA38GosIhO7tvi9GCkPK3fcJyD2k6xNE00EmSS90OU';
+    
+    this.stripe = Stripe(publishableKey);
     
     // Get user ID from localStorage (in real app, from authentication)
     this.userId = localStorage.getItem('userId') || 'user_' + Date.now();

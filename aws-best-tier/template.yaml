@@ -1,0 +1,355 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: Best-tier media pipeline with Step Functions, MediaConvert, and on-demand image resize for GhostMaker Studio
+
+Parameters:
+  BucketName:
+    Type: String
+    Default: ghostmaker-studio-media
+    Description: S3 bucket name for media storage
+  GlacierAfterDays:
+    Type: Number
+    Default: 90
+    Description: Move originals to Glacier Deep Archive after N days
+  AllowedOrigins:
+    Type: String
+    Default: "*"
+    Description: CORS allowed origins (comma-separated)
+  ProjectTableName:
+    Type: String
+    Default: ghostmaker-projects
+    Description: DynamoDB table for projects
+  AssetTableName:
+    Type: String
+    Default: ghostmaker-media
+    Description: DynamoDB table for assets/media
+
+Globals:
+  Function:
+    Runtime: nodejs20.x
+    Timeout: 60
+    MemorySize: 512
+    Tracing: Active
+    Environment:
+      Variables:
+        MEDIA_BUCKET: !Ref MediaBucket
+        PROJECT_TABLE: !Ref ProjectTable
+        ASSET_TABLE: !Ref AssetTable
+        IMAGE_CACHE_PREFIX: proxy-cache/
+        CLOUDFRONT_DOMAIN: d17lfecj9hzae.cloudfront.net
+
+Resources:
+  MediaBucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: !Ref BucketName
+      CorsConfiguration:
+        CorsRules:
+          - AllowedMethods: [GET, PUT, POST, HEAD]
+            AllowedOrigins: !Split [",", !Ref AllowedOrigins]
+            AllowedHeaders: ['*']
+            ExposedHeaders: ['ETag', 'x-amz-request-id']
+      LifecycleConfiguration:
+        Rules:
+          - Id: MoveOriginalsToGlacier
+            Status: Enabled
+            Prefix: originals/
+            Transitions:
+              - StorageClass: DEEP_ARCHIVE
+                TransitionInDays: !Ref GlacierAfterDays
+      NotificationConfiguration:
+        EventBridgeConfiguration:
+          EventBridgeEnabled: true
+      OwnershipControls:
+        Rules: 
+          - ObjectOwnership: BucketOwnerPreferred
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: true
+        BlockPublicPolicy: true
+        IgnorePublicAcls: true
+        RestrictPublicBuckets: true
+
+  MediaBucketPolicy:
+    Type: AWS::S3::BucketPolicy
+    Properties:
+      Bucket: !Ref MediaBucket
+      PolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Sid: EnforceTLS
+            Effect: Deny
+            Principal: '*'
+            Action: s3:*
+            Resource: 
+              - !Sub "${MediaBucket.Arn}/*"
+              - !GetAtt MediaBucket.Arn
+            Condition:
+              Bool:
+                aws:SecureTransport: false
+
+  ProjectTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      TableName: !Ref ProjectTableName
+      BillingMode: PAY_PER_REQUEST
+      AttributeDefinitions:
+        - AttributeName: id
+          AttributeType: S
+      KeySchema:
+        - AttributeName: id
+          KeyType: HASH
+      StreamSpecification:
+        StreamViewType: NEW_AND_OLD_IMAGES
+
+  AssetTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      TableName: !Ref AssetTableName
+      BillingMode: PAY_PER_REQUEST
+      AttributeDefinitions:
+        - AttributeName: id
+          AttributeType: S
+        - AttributeName: projectId
+          AttributeType: S
+        - AttributeName: gsi1pk
+          AttributeType: S
+        - AttributeName: gsi1sk
+          AttributeType: S
+      KeySchema:
+        - AttributeName: id
+          KeyType: HASH
+        - AttributeName: projectId
+          KeyType: RANGE
+      GlobalSecondaryIndexes:
+        - IndexName: GSI1
+          KeySchema:
+            - AttributeName: gsi1pk
+              KeyType: HASH
+            - AttributeName: gsi1sk
+              KeyType: RANGE
+          Projection:
+            ProjectionType: ALL
+
+  ApiGateway:
+    Type: AWS::Serverless::HttpApi
+    Properties:
+      CorsConfiguration:
+        AllowOrigins: !Split [",", !Ref AllowedOrigins]
+        AllowMethods: [GET, POST, PUT, OPTIONS]
+        AllowHeaders: ['*']
+        MaxAge: 600
+
+  PresignUploadFn:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: lambdas/presign-upload/
+      Handler: index.handler
+      Policies:
+        - S3CrudPolicy:
+            BucketName: !Ref MediaBucket
+      Environment:
+        Variables:
+          UPLOAD_PREFIX: originals/
+      Events:
+        Api:
+          Type: HttpApi
+          Properties:
+            ApiId: !Ref ApiGateway
+            Path: /uploads/presign
+            Method: POST
+
+  OnObjectCreatedFn:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: lambdas/on-object-created/
+      Handler: index.handler
+      Environment:
+        Variables:
+          STATE_MACHINE_ARN: !Ref AssetPipeline
+      Policies:
+        - Statement:
+            - Effect: Allow
+              Action: states:StartExecution
+              Resource: !Ref AssetPipeline
+      Events:
+        S3ObjectCreate:
+          Type: EventBridgeRule
+          Properties:
+            Pattern:
+              source:
+                - aws.s3
+              detail-type:
+                - Object Created
+              detail:
+                bucket:
+                  name:
+                    - !Ref MediaBucket
+                object:
+                  key:
+                    - prefix: originals/
+
+  MetadataExtractFn:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: lambdas/metadata-extract/
+      Handler: index.handler
+      Timeout: 120
+      MemorySize: 1024
+      Policies:
+        - S3ReadPolicy:
+            BucketName: !Ref MediaBucket
+        - DynamoDBCrudPolicy:
+            TableName: !Ref AssetTable
+
+  ImageVariantsFn:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: lambdas/image-variants/
+      Handler: index.handler
+      Timeout: 120
+      MemorySize: 2048
+      Policies:
+        - S3CrudPolicy:
+            BucketName: !Ref MediaBucket
+
+  SubmitMediaConvertFn:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: lambdas/submit-mediaconvert/
+      Handler: index.handler
+      Timeout: 30
+      Environment:
+        Variables:
+          MEDIACONVERT_ROLE: !GetAtt MediaConvertRole.Arn
+      Policies:
+        - Statement:
+            - Effect: Allow
+              Action: 
+                - mediaconvert:CreateJob
+                - mediaconvert:GetJob
+                - mediaconvert:ListJobs
+                - mediaconvert:DescribeEndpoints
+              Resource: '*'
+            - Effect: Allow
+              Action: iam:PassRole
+              Resource: !GetAtt MediaConvertRole.Arn
+        - S3ReadPolicy:
+            BucketName: !Ref MediaBucket
+
+  WaitMediaConvertFn:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: lambdas/wait-mediaconvert/
+      Handler: index.handler
+      Timeout: 30
+      Policies:
+        - Statement:
+            - Effect: Allow
+              Action: 
+                - mediaconvert:GetJob
+                - mediaconvert:DescribeEndpoints
+              Resource: '*'
+
+  WriteManifestFn:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: lambdas/write-manifest/
+      Handler: index.handler
+      Policies:
+        - DynamoDBCrudPolicy:
+            TableName: !Ref AssetTable
+        - S3ReadPolicy:
+            BucketName: !Ref MediaBucket
+
+  NotifyStatusFn:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: lambdas/notify-status/
+      Handler: index.handler
+      Policies:
+        - DynamoDBCrudPolicy:
+            TableName: !Ref AssetTable
+
+  ImgResizeFn:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: lambdas/img-resize/
+      Handler: index.handler
+      Timeout: 120
+      MemorySize: 2048
+      Policies:
+        - S3CrudPolicy:
+            BucketName: !Ref MediaBucket
+      Events:
+        Api:
+          Type: HttpApi
+          Properties:
+            ApiId: !Ref ApiGateway
+            Path: /img/{proxy+}
+            Method: GET
+
+  MediaConvertRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: mediaconvert.amazonaws.com
+            Action: sts:AssumeRole
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/AmazonS3FullAccess
+
+  AssetPipeline:
+    Type: AWS::Serverless::StateMachine
+    Properties:
+      DefinitionUri: stateMachines/assetPipeline.asl.json
+      DefinitionSubstitutions:
+        MetadataExtractFnArn: !GetAtt MetadataExtractFn.Arn
+        ImageVariantsFnArn: !GetAtt ImageVariantsFn.Arn
+        SubmitMediaConvertFnArn: !GetAtt SubmitMediaConvertFn.Arn
+        WaitMediaConvertFnArn: !GetAtt WaitMediaConvertFn.Arn
+        WriteManifestFnArn: !GetAtt WriteManifestFn.Arn
+        NotifyStatusFnArn: !GetAtt NotifyStatusFn.Arn
+      Policies:
+        - LambdaInvokePolicy:
+            FunctionName: !Ref MetadataExtractFn
+        - LambdaInvokePolicy:
+            FunctionName: !Ref ImageVariantsFn
+        - LambdaInvokePolicy:
+            FunctionName: !Ref SubmitMediaConvertFn
+        - LambdaInvokePolicy:
+            FunctionName: !Ref WaitMediaConvertFn
+        - LambdaInvokePolicy:
+            FunctionName: !Ref WriteManifestFn
+        - LambdaInvokePolicy:
+            FunctionName: !Ref NotifyStatusFn
+
+Outputs:
+  ApiBaseUrl:
+    Description: Base URL for the API Gateway
+    Value: !Sub "https://${ApiGateway}.execute-api.${AWS::Region}.amazonaws.com"
+    Export:
+      Name: !Sub "${AWS::StackName}-ApiBaseUrl"
+  BucketNameOut:
+    Description: S3 bucket name
+    Value: !Ref MediaBucket
+    Export:
+      Name: !Sub "${AWS::StackName}-BucketName"
+  AssetTableOut:
+    Description: DynamoDB Asset table name
+    Value: !Ref AssetTable
+    Export:
+      Name: !Sub "${AWS::StackName}-AssetTable"
+  ProjectTableOut:
+    Description: DynamoDB Project table name
+    Value: !Ref ProjectTable
+    Export:
+      Name: !Sub "${AWS::StackName}-ProjectTable"
+  StateMachineArn:
+    Description: Step Functions state machine ARN
+    Value: !Ref AssetPipeline
+    Export:
+      Name: !Sub "${AWS::StackName}-StateMachineArn"
+

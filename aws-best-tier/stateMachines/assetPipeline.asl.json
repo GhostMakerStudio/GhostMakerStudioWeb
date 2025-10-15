@@ -1,0 +1,124 @@
+{
+  "Comment": "End-to-end asset processing pipeline for GhostMaker Studio",
+  "StartAt": "MetadataExtract",
+  "States": {
+    "MetadataExtract": {
+      "Type": "Task",
+      "Resource": "${MetadataExtractFnArn}",
+      "ResultPath": "$.meta",
+      "Catch": [
+        {
+          "ErrorEquals": ["States.ALL"],
+          "Next": "HandleError",
+          "ResultPath": "$.error"
+        }
+      ],
+      "Next": "RouteByType"
+    },
+    "RouteByType": {
+      "Type": "Choice",
+      "Choices": [
+        {
+          "Variable": "$.meta.type",
+          "StringEquals": "image",
+          "Next": "ImageVariants"
+        },
+        {
+          "Variable": "$.meta.type",
+          "StringEquals": "video",
+          "Next": "SubmitMediaConvert"
+        }
+      ],
+      "Default": "WriteManifest"
+    },
+    "ImageVariants": {
+      "Type": "Task",
+      "Resource": "${ImageVariantsFnArn}",
+      "ResultPath": "$.image",
+      "Catch": [
+        {
+          "ErrorEquals": ["States.ALL"],
+          "Next": "HandleError",
+          "ResultPath": "$.error"
+        }
+      ],
+      "Next": "WriteManifest"
+    },
+    "SubmitMediaConvert": {
+      "Type": "Task",
+      "Resource": "${SubmitMediaConvertFnArn}",
+      "ResultPath": "$.mcJob",
+      "Catch": [
+        {
+          "ErrorEquals": ["States.ALL"],
+          "Next": "HandleError",
+          "ResultPath": "$.error"
+        }
+      ],
+      "Next": "WaitForMC"
+    },
+    "WaitForMC": {
+      "Type": "Wait",
+      "Seconds": 30,
+      "Next": "CheckMCStatus"
+    },
+    "CheckMCStatus": {
+      "Type": "Task",
+      "Resource": "${WaitMediaConvertFnArn}",
+      "ResultPath": "$.mcResult",
+      "Catch": [
+        {
+          "ErrorEquals": ["States.ALL"],
+          "Next": "HandleError",
+          "ResultPath": "$.error"
+        }
+      ],
+      "Next": "IsMCComplete"
+    },
+    "IsMCComplete": {
+      "Type": "Choice",
+      "Choices": [
+        {
+          "Variable": "$.mcResult.status",
+          "StringEquals": "COMPLETE",
+          "Next": "WriteManifest"
+        },
+        {
+          "Variable": "$.mcResult.status",
+          "StringEquals": "ERROR",
+          "Next": "HandleError"
+        },
+        {
+          "Variable": "$.mcResult.status",
+          "StringEquals": "CANCELED",
+          "Next": "HandleError"
+        }
+      ],
+      "Default": "WaitForMC"
+    },
+    "WriteManifest": {
+      "Type": "Task",
+      "Resource": "${WriteManifestFnArn}",
+      "ResultPath": "$.manifest",
+      "Catch": [
+        {
+          "ErrorEquals": ["States.ALL"],
+          "Next": "HandleError",
+          "ResultPath": "$.error"
+        }
+      ],
+      "Next": "Notify"
+    },
+    "Notify": {
+      "Type": "Task",
+      "Resource": "${NotifyStatusFnArn}",
+      "End": true
+    },
+    "HandleError": {
+      "Type": "Task",
+      "Resource": "${NotifyStatusFnArn}",
+      "End": true
+    }
+  }
+}
+

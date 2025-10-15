@@ -54,10 +54,45 @@ class GhostMakerStudio {
   }
 
   async fetchPortfolioData() {
-    // Mock portfolio data - replace with actual API call
+    try {
+      // Fetch real portfolio data from your API
+      const response = await fetch('/api/projects');
+      const data = await response.json();
+      
+      if (data.success && data.projects) {
+        console.log('📡 Loaded', data.projects.length, 'projects from API');
+        
+        // Transform project data to portfolio format
+        return data.projects.map(project => {
+          // Get the first media item as the cover image
+          const coverMedia = project.content && project.content.length > 0 ? project.content[0] : null;
+          const coverImage = coverMedia ? coverMedia.thumbnailUrl || coverMedia.url : 'public/images/placeholder-project.jpg';
+          
+          return {
+            id: project.id,
+            title: project.title,
+            description: project.description,
+            image: coverImage,
+            category: 'project',
+            client: 'GhostMaker Studio',
+            link: '#',
+            project: project // Keep full project data for advanced features
+          };
+        });
+      } else {
+        console.log('⚠️ No projects found, using fallback data');
+        return this.getFallbackPortfolioData();
+      }
+    } catch (error) {
+      console.error('❌ Failed to fetch portfolio data:', error);
+      return this.getFallbackPortfolioData();
+    }
+  }
+
+  getFallbackPortfolioData() {
     return [
       {
-        id: 1,
+        id: 'fallback-1',
         title: 'Event Flyer Design',
         description: 'Professional flyer for music festival',
         image: 'public/images/portfolio/flyer-1.jpg',
@@ -66,7 +101,7 @@ class GhostMakerStudio {
         link: 'https://example.com/festival-flyer'
       },
       {
-        id: 2,
+        id: 'fallback-2',
         title: 'Product Video',
         description: 'Promotional video for new product launch',
         image: 'public/images/portfolio/video-1.jpg',
@@ -75,7 +110,7 @@ class GhostMakerStudio {
         link: 'https://youtube.com/watch?v=example'
       },
       {
-        id: 3,
+        id: 'fallback-3',
         title: 'E-commerce Website',
         description: 'Custom e-commerce platform with payment integration',
         image: 'public/images/portfolio/web-1.jpg',
@@ -89,10 +124,17 @@ class GhostMakerStudio {
   displayPortfolio(portfolioData) {
     const portfolioGrid = document.getElementById('portfolioGrid');
     
-    portfolioGrid.innerHTML = portfolioData.map(item => `
+    portfolioGrid.innerHTML = portfolioData.map((item, index) => `
       <div class="portfolio-item" data-category="${item.category}">
         <div class="portfolio-image">
-          <img src="${item.image}" alt="${item.title}" loading="lazy">
+          <img id="progressive-image-${index}" 
+               src="${item.image}" 
+               alt="${item.title}" 
+               loading="lazy"
+               style="filter: blur(20px); transform: scale(1.1); opacity: 1; 
+                      will-change: transform, filter, opacity;
+                      transition: transform 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94), opacity 0.3s ease;"
+               onload="if (typeof startProgressiveImageLoading === 'function') { startProgressiveImageLoading(${index}); }">
           <div class="portfolio-overlay">
             <h3>${item.title}</h3>
             <p>${item.description}</p>
@@ -111,6 +153,9 @@ class GhostMakerStudio {
 
     // Add hover effects
     this.setupPortfolioHovers();
+    
+    // Start progressive loading for all images
+    this.startProgressiveLoading(portfolioData);
   }
 
   displayPortfolioError() {
@@ -142,6 +187,61 @@ class GhostMakerStudio {
   showPortfolioDetails(portfolioId) {
     // TODO: Implement portfolio detail modal
     console.log('Show portfolio details for:', portfolioId);
+  }
+
+  // 🚀 FACEBOOK-STYLE PROGRESSIVE LOADING
+  startProgressiveLoading(portfolioData) {
+    console.log('🚀 Starting Facebook-style progressive loading for', portfolioData.length, 'images');
+    
+    portfolioData.forEach((item, index) => {
+      setTimeout(() => {
+        this.startProgressiveImageLoading(index, item);
+      }, index * 100); // Stagger loading for smooth effect
+    });
+  }
+
+  startProgressiveImageLoading(index, item) {
+    const img = document.getElementById(`progressive-image-${index}`);
+    if (!img) return;
+
+    console.log(`📸 Starting progressive loading for image ${index}: ${item.title}`);
+
+    // Create a high-quality version of the image
+    const highQualityImg = new Image();
+    
+    highQualityImg.onload = () => {
+      console.log(`✅ High quality loaded for ${item.title}`);
+      
+      // Facebook-style smooth transition
+      img.style.transition = 'filter 0.3s ease-out, transform 0.3s ease-out';
+      img.style.filter = 'blur(0px)';
+      img.style.transform = 'scale(1)';
+      
+      // Add loaded class for CSS styling
+      img.classList.add('loaded');
+      
+      // Optional: Fade to high quality after blur is removed
+      setTimeout(() => {
+        img.style.transition = 'opacity 0.2s ease-in-out';
+        img.style.opacity = '0.5';
+        
+        setTimeout(() => {
+          // Swap to high quality (in this case, same image but could be different quality)
+          img.style.opacity = '1';
+          console.log(`🎉 Progressive loading complete for ${item.title}`);
+        }, 100);
+      }, 300);
+    };
+    
+    highQualityImg.onerror = () => {
+      console.log(`❌ Failed to load high quality for ${item.title}`);
+      // Just remove blur effect
+      img.style.filter = 'none';
+      img.style.transform = 'scale(1)';
+    };
+    
+    // Start loading the high quality image
+    highQualityImg.src = item.image;
   }
 
   setupScrollEffects() {

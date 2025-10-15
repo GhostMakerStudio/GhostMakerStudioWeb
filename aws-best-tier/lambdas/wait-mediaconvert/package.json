@@ -1,0 +1,9 @@
+{
+  "name": "wait-mediaconvert",
+  "version": "1.0.0",
+  "type": "module",
+  "dependencies": {
+    "@aws-sdk/client-mediaconvert": "^3.400.0"
+  }
+}
+

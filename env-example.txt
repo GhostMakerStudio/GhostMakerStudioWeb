@@ -1,0 +1,29 @@
+# GhostMaker Studio Environment Variables
+# Copy this content to a new file called .env and add your real values
+
+# Stripe Configuration (REQUIRED)
+STRIPE_SECRET_KEY=sk_test_YOUR_SECRET_KEY_HERE
+STRIPE_PUBLISHABLE_KEY=pk_test_51SFPAcEPGGa8C63UYWZuluhLjM0xbDs4zcWRWrBJgNjrwwYAsnlrXSBrHA38GosIhO7tvi9GCkPK3fcJyD2k6xNE00EmSS90OU
+
+# Server Configuration
+PORT=3000
+NODE_ENV=development
+
+# AWS Configuration (Optional - for file uploads)
+AWS_ACCESS_KEY_ID=your_access_key
+AWS_SECRET_ACCESS_KEY=your_secret_key
+S3_BUCKET=ghostmaker-studio-media
+AWS_REGION=us-east-1
+
+# Database Configuration (Optional - for future use)
+DATABASE_URL=mongodb://localhost:27017/ghostmaker-studio
+
+
+
+
+
+
+
+
+
+

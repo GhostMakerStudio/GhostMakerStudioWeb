@@ -1,0 +1,117 @@
+{
+  "projects": [
+    {
+      "id": "startup-bizdev",
+      "title": "StartUp BizDev",
+      "description": "Complete branding and marketing materials for a tech startup",
+      "coverImage": "https://ghostmaker-studio-media.s3.amazonaws.com/projects/startup-bizdev/cover.jpg",
+      "appLinks": {
+        "android": "https://play.google.com/store/apps/details?id=com.startup.bizdev",
+        "ios": null
+      },
+      "tags": [
+        "branding",
+        "design",
+        "startup"
+      ],
+      "date": "2024-01-15T10:30:00Z",
+      "status": "published",
+      "mediaItems": []
+    },
+    {
+      "id": "rave-christmas",
+      "title": "How the Rave Stole Christmas",
+      "description": "Event branding and promotional materials for a holiday rave",
+      "coverImage": "https://ghostmaker-studio-media.s3.amazonaws.com/projects/rave-christmas/cover.jpg",
+      "appLinks": null,
+      "tags": [
+        "event",
+        "rave",
+        "graphics"
+      ],
+      "date": "2023-12-01T15:45:00Z",
+      "status": "published",
+      "mediaItems": []
+    },
+    {
+      "id": "christian-daily-thoughts",
+      "title": "Christian Daily Thoughts",
+      "description": "Mobile app for daily Christian inspiration and devotionals",
+      "coverImage": "https://ghostmaker-studio-media.s3.amazonaws.com/projects/christian-daily-thoughts/cover.jpg",
+      "appLinks": {
+        "android": "https://play.google.com/store/apps/details?id=com.christian.dailythoughts",
+        "ios": null
+      },
+      "tags": [
+        "mobile",
+        "app",
+        "christian"
+      ],
+      "date": "2024-02-20T09:15:00Z",
+      "status": "published",
+      "mediaItems": []
+    },
+    {
+      "id": "the-new-project",
+      "title": "The New Project",
+      "description": "",
+      "coverImage": "https://ghostmaker-studio-media.s3.amazonaws.com/projects/temp-project/media/StartUpBizDecCommercial1-1760112582340.mp4",
+      "content": [
+        {
+          "type": "video",
+          "url": "https://ghostmaker-studio-media.s3.amazonaws.com/projects/temp-project/media/StartUpBizDecCommercial1-1760112582340.mp4",
+          "mediaId": "media_1760112593622"
+        }
+      ],
+      "createdAt": "2025-10-10T16:10:01.600Z",
+      "date": "2025-10-10T16:10:01.629Z",
+      "status": "published",
+      "mediaItems": []
+    }
+  ],
+  "media": [
+    {
+      "id": "media_1",
+      "projectId": "startup-bizdev",
+      "originalName": "logo-design.jpg",
+      "fileName": "logo-design-1703123456789.jpg",
+      "fileType": "image",
+      "mimeType": "image/jpeg",
+      "s3Key": "projects/startup-bizdev/media/logo-design-1703123456789.jpg",
+      "s3Url": "https://ghostmaker-studio-media.s3.amazonaws.com/projects/startup-bizdev/media/logo-design-1703123456789.jpg",
+      "size": 245760,
+      "uploadDate": "2024-01-15T10:35:00Z",
+      "isCoverImage": false,
+      "qualities": [
+        "original"
+      ]
+    },
+    {
+      "id": "media_1760112593622",
+      "projectId": "temp-project",
+      "originalName": "StartUpBizDecCommercial1.mp4",
+      "fileName": "StartUpBizDecCommercial1-1760112582340.mp4",
+      "fileType": "video",
+      "mimeType": "video/mp4",
+      "s3Key": "projects/temp-project/media/StartUpBizDecCommercial1-1760112582340.mp4",
+      "s3Url": "https://ghostmaker-studio-media.s3.amazonaws.com/projects/temp-project/media/StartUpBizDecCommercial1-1760112582340.mp4",
+      "size": 176740487,
+      "uploadDate": "2025-10-10T16:09:53.622Z",
+      "isCoverImage": false,
+      "qualities": [
+        "original"
+      ]
+    }
+  ],
+  "settings": {
+    "lastUpdated": "2025-10-10T16:10:01.629Z",
+    "version": "1.0"
+  }
+}
+
+
+
+
+
+
+

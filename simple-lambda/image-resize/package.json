@@ -1,0 +1,11 @@
+{
+  "name": "image-resize",
+  "version": "1.0.0",
+  "dependencies": {
+    "aws-sdk": "^2.1500.0",
+    "sharp": "^0.33.0"
+  }
+}
+
+
+

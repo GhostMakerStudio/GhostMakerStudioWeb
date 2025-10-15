@@ -18,7 +18,9 @@
             </div>
             <div class="nav-links">
                 <a href="../../index.html">Public Site</a>
+                <a href="#projects" class="nav-link active">Projects</a>
                 <a href="#orders">Orders</a>
+                <a href="#media">Media</a>
                 <a href="#analytics">Analytics</a>
                 <button id="logoutBtn" class="btn btn-secondary">Logout</button>
             </div>
@@ -51,10 +53,10 @@
                     </div>
                 </div>
                 <div class="stat-card">
-                    <div class="stat-icon">⚡</div>
+                    <div class="stat-icon">📁</div>
                     <div class="stat-content">
-                        <h3 id="avgProcessingTime">0h</h3>
-                        <p>Avg Processing Time</p>
+                        <h3 id="totalProjects">0</h3>
+                        <p>Total Projects</p>
                     </div>
                 </div>
             </div>
@@ -65,8 +67,23 @@
     <section class="dashboard-content">
         <div class="container">
             <div class="dashboard-grid">
+                <!-- Projects Management -->
+                <div class="dashboard-panel" id="projectsPanel">
+                    <div class="panel-header">
+                        <h2>Projects Management</h2>
+                        <div class="panel-actions">
+                            <button id="createProject" class="btn btn-primary">+ New Project</button>
+                            <button id="reorderProjects" class="btn btn-secondary">Reorder Projects</button>
+                            <button id="refreshProjects" class="btn btn-secondary">Refresh</button>
+                        </div>
+                    </div>
+                    <div class="projects-list" id="projectsList">
+                        <!-- Projects will be loaded here -->
+                    </div>
+                </div>
+
                 <!-- Orders Queue -->
-                <div class="dashboard-panel" id="ordersPanel">
+                <div class="dashboard-panel" id="ordersPanel" style="display: none;">
                     <div class="panel-header">
                         <h2>Order Queue</h2>
                         <div class="panel-actions">
@@ -78,8 +95,27 @@
                     </div>
                 </div>
 
+                <!-- Media Library -->
+                <div class="dashboard-panel" id="mediaPanel">
+                    <div class="panel-header">
+                        <h2>Media Library</h2>
+                        <div class="panel-actions">
+                            <button id="uploadMedia" class="btn btn-primary">+ Upload Media</button>
+                            <select id="mediaFilter">
+                                <option value="all">All Media</option>
+                                <option value="images">Images</option>
+                                <option value="videos">Videos</option>
+                                <option value="processing">Processing</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="media-grid" id="mediaGrid">
+                        <!-- Media items will be loaded here -->
+                    </div>
+                </div>
+
                 <!-- Performance Analytics -->
-                <div class="dashboard-panel" id="analyticsPanel">
+                <div class="dashboard-panel" id="analyticsPanel" style="display: none;">
                     <div class="panel-header">
                         <h2>Performance Analytics</h2>
                         <div class="panel-actions">
@@ -147,6 +183,95 @@
             </div>
         </div>
     </section>
+
+    <!-- Project Creation Modal -->
+    <div id="projectModal" class="modal">
+        <div class="modal-content large">
+            <div class="modal-header">
+                <h2>Create New Project</h2>
+                <button class="modal-close">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="projectForm">
+                    <div class="form-group">
+                        <label for="projectTitle">Project Title</label>
+                        <input type="text" id="projectTitle" name="title" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="projectDescription">Description</label>
+                        <textarea id="projectDescription" name="description" rows="3"></textarea>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="projectCategory">Category</label>
+                            <select id="projectCategory" name="category" required>
+                                <option value="web_development">Web Development</option>
+                                <option value="video_production">Video Production</option>
+                                <option value="graphic_design">Graphic Design</option>
+                                <option value="branding">Branding</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="projectClient">Client</label>
+                            <input type="text" id="projectClient" name="client">
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="projectYear">Year</label>
+                            <input type="number" id="projectYear" name="year" value="2024" required>
+                        </div>
+                        <div class="form-group">
+                            <label>
+                                <input type="checkbox" id="projectFeatured" name="featured">
+                                Featured Project
+                            </label>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="projectTags">Tags (comma-separated)</label>
+                        <input type="text" id="projectTags" name="tags" placeholder="web, ui, responsive">
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button id="saveProject" class="btn btn-primary">Create Project</button>
+                <button class="btn btn-secondary modal-close">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Media Upload Modal -->
+    <div id="uploadModal" class="modal">
+        <div class="modal-content large">
+            <div class="modal-header">
+                <h2>Upload Media</h2>
+                <button class="modal-close">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="upload-area" id="uploadArea">
+                    <div class="upload-icon">📁</div>
+                    <h3>Drag & Drop Files Here</h3>
+                    <p>Or click to browse files</p>
+                    <input type="file" id="fileInput" multiple accept="image/*,video/*" style="display: none;">
+                    <button id="browseFiles" class="btn btn-secondary">Browse Files</button>
+                </div>
+                <div class="upload-progress" id="uploadProgress" style="display: none;">
+                    <div class="progress-bar">
+                        <div class="progress-fill" id="progressFill"></div>
+                    </div>
+                    <div class="progress-text" id="progressText">0%</div>
+                </div>
+                <div class="upload-queue" id="uploadQueue">
+                    <!-- Upload queue items will appear here -->
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button id="startUpload" class="btn btn-primary" disabled>Start Upload</button>
+                <button class="btn btn-secondary modal-close">Cancel</button>
+            </div>
+        </div>
+    </div>
 
     <!-- Order Detail Modal -->
     <div id="orderModal" class="modal">

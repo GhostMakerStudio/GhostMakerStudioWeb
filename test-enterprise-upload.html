@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🚀 Enterprise Media Pipeline Test</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .upload-area {
+            border: 3px dashed #ddd;
+            border-radius: 8px;
+            padding: 40px;
+            text-align: center;
+            margin: 20px 0;
+            transition: all 0.3s ease;
+        }
+        .upload-area.dragover {
+            border-color: #007bff;
+            background: #f8f9ff;
+        }
+        .upload-area input {
+            display: none;
+        }
+        .btn {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 16px;
+            margin: 10px;
+        }
+        .btn:hover {
+            background: #0056b3;
+        }
+        .btn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+        .status {
+            margin: 20px 0;
+            padding: 15px;
+            border-radius: 6px;
+            font-weight: 500;
+        }
+        .status.pending {
+            background: #fff3cd;
+            color: #856404;
+            border: 1px solid #ffeaa7;
+        }
+        .status.processing {
+            background: #d1ecf1;
+            color: #0c5460;
+            border: 1px solid #bee5eb;
+        }
+        .status.ready {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        .status.error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        .media-preview {
+            margin: 20px 0;
+            padding: 20px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            background: #fafafa;
+        }
+        .media-preview img {
+            max-width: 100%;
+            height: auto;
+            border-radius: 4px;
+        }
+        .blurhash-placeholder {
+            width: 100%;
+            height: 200px;
+            border-radius: 4px;
+            background: #f0f0f0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #666;
+        }
+        .logs {
+            background: #f8f9fa;
+            border: 1px solid #e9ecef;
+            border-radius: 4px;
+            padding: 15px;
+            margin: 20px 0;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🚀 Enterprise Media Pipeline Test</h1>
+        <p>Test the new v3 upload system with background processing!</p>
+        
+        <div class="upload-area" id="uploadArea">
+            <p>📁 Drag & drop files here or click to select</p>
+            <input type="file" id="fileInput" multiple accept="image/*,video/*">
+            <button class="btn" onclick="document.getElementById('fileInput').click()">
+                Choose Files
+            </button>
+        </div>
+        
+        <div id="statusContainer"></div>
+        <div id="mediaContainer"></div>
+        <div id="logs" class="logs"></div>
+    </div>
+
+    <script>
+        const uploadArea = document.getElementById('uploadArea');
+        const fileInput = document.getElementById('fileInput');
+        const statusContainer = document.getElementById('statusContainer');
+        const mediaContainer = document.getElementById('mediaContainer');
+        const logs = document.getElementById('logs');
+        
+        let projectId = `test-project-${Date.now()}`;
+        let uploads = [];
+        
+        function log(message) {
+            const timestamp = new Date().toLocaleTimeString();
+            logs.innerHTML += `[${timestamp}] ${message}\n`;
+            logs.scrollTop = logs.scrollHeight;
+            console.log(message);
+        }
+        
+        function updateStatus(mediaId, status, data = {}) {
+            const existing = uploads.find(u => u.mediaId === mediaId);
+            if (existing) {
+                existing.status = status;
+                Object.assign(existing, data);
+            } else {
+                uploads.push({ mediaId, status, ...data });
+            }
+            
+            renderStatus();
+        }
+        
+        function renderStatus() {
+            statusContainer.innerHTML = uploads.map(upload => `
+                <div class="status ${upload.status}">
+                    <strong>${upload.filename}</strong> - ${upload.status.toUpperCase()}
+                    ${upload.blurhash ? `<br>BlurHash: ${upload.blurhash}` : ''}
+                    ${upload.thumbnailUrl ? `<br>Thumbnail: <a href="${upload.thumbnailUrl}" target="_blank">View</a>` : ''}
+                    ${upload.lqipUrl ? `<br>LQIP: <a href="${upload.lqipUrl}" target="_blank">View</a>` : ''}
+                </div>
+            `).join('');
+        }
+        
+        function renderMedia() {
+            const readyMedia = uploads.filter(u => u.status === 'ready');
+            mediaContainer.innerHTML = readyMedia.map(upload => `
+                <div class="media-preview">
+                    <h4>${upload.filename}</h4>
+                    ${upload.type === 'image' ? `
+                        <img src="${upload.thumbnailUrl}" alt="${upload.filename}">
+                        <p><strong>BlurHash:</strong> ${upload.blurhash}</p>
+                        <p><strong>On-demand resize test:</strong></p>
+                        <img src="/img/${upload.originalKey}?w=400&q=70&f=webp" alt="400px WebP">
+                        <img src="/img/${upload.originalKey}?w=800&q=85&f=jpg" alt="800px JPEG">
+                    ` : `
+                        <p>Video processing with MediaConvert...</p>
+                        ${upload.mediaconvertJobId ? `<p>Job ID: ${upload.mediaconvertJobId}</p>` : ''}
+                    `}
+                </div>
+            `).join('');
+        }
+        
+        // Drag & drop handlers
+        uploadArea.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            uploadArea.classList.add('dragover');
+        });
+        
+        uploadArea.addEventListener('dragleave', () => {
+            uploadArea.classList.remove('dragover');
+        });
+        
+        uploadArea.addEventListener('drop', (e) => {
+            e.preventDefault();
+            uploadArea.classList.remove('dragover');
+            handleFiles(e.dataTransfer.files);
+        });
+        
+        fileInput.addEventListener('change', (e) => {
+            handleFiles(e.target.files);
+        });
+        
+        async function handleFiles(files) {
+            for (const file of files) {
+                await uploadFile(file);
+            }
+        }
+        
+        async function uploadFile(file) {
+            log(`📤 Starting upload: ${file.name}`);
+            
+            try {
+                // Upload directly through server (bypasses CORS)
+                const formData = new FormData();
+                formData.append('file', file);
+                formData.append('projectId', projectId);
+                
+                const uploadResponse = await fetch('/api/v3/upload', {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                const uploadData = await uploadResponse.json();
+                
+                if (!uploadData.success) {
+                    throw new Error(uploadData.error);
+                }
+                
+                log(`✅ File uploaded successfully: ${uploadData.mediaId}`);
+                updateStatus(uploadData.mediaId, 'processing', { 
+                    filename: file.name,
+                    originalKey: uploadData.key,
+                    type: file.type.startsWith('image/') ? 'image' : 'video'
+                });
+                
+                // Poll for processing status
+                pollStatus(uploadData.mediaId);
+                
+            } catch (error) {
+                log(`❌ Upload failed: ${error.message}`);
+                const mediaId = `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+                updateStatus(mediaId, 'error', { filename: file.name, error: error.message });
+            }
+        }
+        
+        async function pollStatus(mediaId) {
+            const maxAttempts = 30; // 30 seconds max
+            let attempts = 0;
+            
+            const poll = async () => {
+                try {
+                    const response = await fetch(`/api/v3/media/${mediaId}/status?projectId=${projectId}`);
+                    const data = await response.json();
+                    
+                    if (data.success) {
+                        const media = data.media;
+                        
+                        if (media.status === 'ready') {
+                            log(`✅ Processing complete: ${media.filename}`);
+                            updateStatus(mediaId, 'ready', media);
+                            renderMedia();
+                        } else if (media.status === 'processing') {
+                            log(`⏳ Still processing: ${media.filename} (${attempts + 1}/${maxAttempts})`);
+                            attempts++;
+                            
+                            if (attempts < maxAttempts) {
+                                setTimeout(poll, 1000);
+                            } else {
+                                log(`⏰ Processing timeout: ${media.filename}`);
+                                updateStatus(mediaId, 'error', { 
+                                    filename: media.filename, 
+                                    error: 'Processing timeout' 
+                                });
+                            }
+                        } else if (media.status === 'pending') {
+                            log(`⏳ Processing started: ${media.filename}`);
+                            setTimeout(poll, 1000);
+                        }
+                    } else {
+                        log(`❌ Status check failed: ${data.error}`);
+                        updateStatus(mediaId, 'error', { 
+                            filename: 'Unknown', 
+                            error: data.error 
+                        });
+                    }
+                } catch (error) {
+                    log(`❌ Status check error: ${error.message}`);
+                    attempts++;
+                    
+                    if (attempts < maxAttempts) {
+                        setTimeout(poll, 2000);
+                    } else {
+                        updateStatus(mediaId, 'error', { 
+                            filename: 'Unknown', 
+                            error: 'Status check timeout' 
+                        });
+                    }
+                }
+            };
+            
+            // Start polling after a short delay
+            setTimeout(poll, 2000);
+        }
+        
+        log(`🚀 Enterprise Media Pipeline Test Ready`);
+        log(`📁 Project ID: ${projectId}`);
+        log(`⏳ Waiting for files...`);
+    </script>
+</body>
+</html>

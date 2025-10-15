@@ -1,0 +1,11 @@
+{
+  "name": "image-processor",
+  "version": "1.0.0",
+  "dependencies": {
+    "aws-sdk": "^2.1500.0",
+    "blurhash": "^2.0.5",
+    "sharp": "^0.33.0"
+  }
+}
+
+
