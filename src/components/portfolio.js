@@ -137,6 +137,9 @@ class PortfolioGallery {
     // Create grid items using layout positions
     // If no positions are defined, use first few projects as fallback
     const hasPositions = Object.keys(this.gridLayout.positions).length > 0;
+    console.log('🔍 Grid positions object:', this.gridLayout.positions);
+    console.log('🔍 Has positions:', hasPositions);
+    console.log('🔍 Available project IDs:', this.projects.map(p => p.id));
     
     for (let i = 0; i < this.gridLayout.width * this.gridLayout.height; i++) {
       const gridPosition = i;
@@ -145,7 +148,9 @@ class PortfolioGallery {
       if (hasPositions) {
         // Use grid layout positions
         const projectId = this.gridLayout.positions[gridPosition];
+        console.log(`🔍 Position ${gridPosition}: looking for projectId "${projectId}"`);
         project = projectId ? this.projects.find(p => p.id === projectId) : null;
+        console.log(`🔍 Found project:`, project ? project.title : 'null');
       } else {
         // Fallback: use projects in order
         project = this.projects[i] || null;
@@ -1436,7 +1441,7 @@ class PortfolioGallery {
   }
 
   preloadImage(media, targetQuality) {
-    const quality = this.selectImageQuality(media, targetQuality);
+    const quality = this.selectImageQuality(media.imageQualities, targetQuality);
     if (!quality) return;
     
     const imageUrl = quality.url || quality;
@@ -1489,7 +1494,7 @@ class PortfolioGallery {
     }
     
     // Then load the actual quality
-    const quality = this.selectImageQuality(media, this.loadingStrategy.quality);
+    const quality = this.selectImageQuality(media.imageQualities, this.loadingStrategy.quality);
     if (quality && quality.url) {
       const finalImg = new Image();
       finalImg.onload = () => {
@@ -1504,7 +1509,7 @@ class PortfolioGallery {
   loadDirect(element, media) {
     console.log(`⚡ Direct loading for ${media.filename}`);
     
-    const quality = this.selectImageQuality(media, this.loadingStrategy.quality);
+    const quality = this.selectImageQuality(media.imageQualities, this.loadingStrategy.quality);
     if (quality && quality.url) {
       element.src = quality.url;
       this.imageCache.set(quality.url, element);
