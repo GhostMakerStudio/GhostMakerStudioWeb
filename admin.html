@@ -3335,6 +3335,9 @@
             }
         }
         
+        // Global variable to track which images are preloaded
+        let preloadedImages = new Set();
+        
         async function preloadProjectThumbnails() {
             const imageUrls = [];
             
@@ -3366,6 +3369,9 @@
             const imagesToPreload = imageUrls.slice(0, smartLoadingConfig.preloadCount);
             console.log(`🎯 Preloading ${imagesToPreload.length} visible images with ${smartLoadingConfig.quality} quality`);
             
+            // Clear previous preloaded images set
+            preloadedImages.clear();
+            
             // Show preloading progress
             if (imagesToPreload.length > 0) {
                 showPreloadProgress(imagesToPreload.length);
@@ -3378,6 +3384,7 @@
                     const img = new Image();
                     img.onload = () => {
                         cacheImage(url, img);
+                        preloadedImages.add(url); // Track as preloaded
                         loadedCount++;
                         updatePreloadProgress(loadedCount, imagesToPreload.length);
                         resolve(url);
@@ -3393,6 +3400,9 @@
             
             hidePreloadProgress();
             console.log(`✅ Smart preloaded ${imagesToPreload.length} thumbnails (${imageUrls.length - imagesToPreload.length} remaining for lazy load)`);
+            
+            // Re-render projects to show only preloaded images
+            renderProjects();
         }
         
         function showPreloadProgress(totalImages) {
@@ -3958,30 +3968,30 @@
                                 const imageUrl = item.thumbnailUrl || item.url;
                                 // For click handler, prioritize HLS URL for videos, otherwise use actual media URL
                                 const clickUrl = item.type === 'video' ? (item.urls?.hls || item.url) : imageUrl;
-                                console.log(`🖼️ Gallery thumbnail ${index}: ${item.type} - Using URL: ${imageUrl} (thumbnailUrl: ${item.thumbnailUrl})`);
-                                console.log(`🔍 Item URLs available:`, item.urls);
-                                console.log(`🔍 HLS URL:`, item.urls?.hls);
                                 
-                                // Check if this image is already cached
-                                if (imageCache.has(imageUrl)) {
-                                    console.log(`✅ Thumbnail ${index} already cached`);
-                                } else {
-                                    console.log(`⚠️ Thumbnail ${index} not cached yet`);
-                                }
+                                // Check if this image is preloaded
+                                const isPreloaded = preloadedImages.has(imageUrl);
+                                const shouldShow = isPreloaded || index < 16; // Show first 16 + preloaded ones
+                                
+                                console.log(`🖼️ Gallery thumbnail ${index}: ${item.type} - Preloaded: ${isPreloaded}, Show: ${shouldShow}`);
                                 
                                 return `
                                 <div class="media-item ${isReorderMode ? 'reorder-mode' : ''}" 
                                      data-index="${index}" 
                                      data-media-id="${item.mediaId || ''}"
+                                     data-preloaded="${isPreloaded}"
+                                     data-should-show="${shouldShow}"
                                      draggable="${isReorderMode ? 'true' : 'false'}"
                                      ondragstart="${isReorderMode ? `handleMediaDragStart(event, ${index})` : ''}"
                                      onmousedown="handleMouseDown(event, ${index})"
-                                     onclick="handleMediaClick(event, '${clickUrl}', '${item.type}', ${index}, '${project.id}')">
+                                     onclick="handleMediaClick(event, '${clickUrl}', '${item.type}', ${index}, '${project.id}')"
+                                     style="display: ${shouldShow ? 'block' : 'none'};">
                                     ${item.type === 'video' ? 
-                                        `<img src="${imageUrl}" alt="${item.alt || 'Video'}" style="width: 100%; height: 100%; object-fit: contain; background: #1a1a1a;" data-video="true">` :
-                                        `<img src="${imageUrl}" alt="${item.alt || 'Media'}" style="width: 100%; height: 100%; object-fit: contain; background: #1a1a1a;">`
+                                        `<img src="${shouldShow ? imageUrl : ''}" alt="${item.alt || 'Video'}" style="width: 100%; height: 100%; object-fit: contain; background: #1a1a1a;" data-video="true" loading="${isPreloaded ? 'eager' : 'lazy'}">` :
+                                        `<img src="${shouldShow ? imageUrl : ''}" alt="${item.alt || 'Media'}" style="width: 100%; height: 100%; object-fit: contain; background: #1a1a1a;" loading="${isPreloaded ? 'eager' : 'lazy'}">`
                                     }
                                     ${item.type === 'video' ? '<div class="play-icon">▶</div>' : ''}
+                                    ${!shouldShow ? '<div class="lazy-load-placeholder" style="width: 100%; height: 100%; background: #333; display: flex; align-items: center; justify-content: center; color: #666;">Loading...</div>' : ''}
                                 </div>
                             `;
                             }).join('') :
@@ -3992,6 +4002,52 @@
             `;
             
             document.body.appendChild(viewerModal);
+            
+            // Set up lazy loading for remaining images
+            setupLazyLoadingForGallery(project);
+        }
+        
+        function setupLazyLoadingForGallery(project) {
+            const mediaItems = document.querySelectorAll('.media-item[data-should-show="false"]');
+            console.log(`🔄 Setting up lazy loading for ${mediaItems.length} hidden media items`);
+            
+            // Load images when they come into view or when user scrolls
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        const mediaItem = entry.target;
+                        const index = parseInt(mediaItem.dataset.index);
+                        const item = project.content[index];
+                        
+                        if (item) {
+                            const imageUrl = item.thumbnailUrl || item.url;
+                            const img = mediaItem.querySelector('img');
+                            
+                            if (img && !img.src) {
+                                console.log(`📸 Lazy loading image ${index}: ${imageUrl}`);
+                                img.src = imageUrl;
+                                img.loading = 'lazy';
+                                
+                                // Show the item and hide placeholder
+                                mediaItem.style.display = 'block';
+                                const placeholder = mediaItem.querySelector('.lazy-load-placeholder');
+                                if (placeholder) {
+                                    placeholder.style.display = 'none';
+                                }
+                                
+                                // Stop observing this item
+                                observer.unobserve(mediaItem);
+                            }
+                        }
+                    }
+                });
+            }, {
+                root: document.querySelector('.media-viewer-body'),
+                rootMargin: '50px'
+            });
+            
+            // Start observing hidden items
+            mediaItems.forEach(item => observer.observe(item));
         }
         
         function closeMediaViewer() {
