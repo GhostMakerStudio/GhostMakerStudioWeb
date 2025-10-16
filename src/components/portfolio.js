@@ -265,6 +265,40 @@ class PortfolioGallery {
     return firstMedia.url;
   }
 
+  // 🎯 GET PROJECT BLUR IMAGE (FOR PROGRESSIVE LOADING)
+  getProjectBlurImage(project) {
+    if (!project || !project.content || project.content.length === 0) {
+      return '/public/images/placeholder-project.jpg';
+    }
+    
+    const firstMedia = project.content[0];
+    if (!firstMedia) return '/public/images/placeholder-project.jpg';
+    
+    // Look for blur_placeholder first (fastest loading for initial display)
+    if (firstMedia.imageQualities && firstMedia.imageQualities.length > 0) {
+      const blurPlaceholder = firstMedia.imageQualities.find(q => q.quality === 'blur_placeholder');
+      if (blurPlaceholder) {
+        console.log('✅ Found blur_placeholder quality (fastest):', blurPlaceholder.url);
+        return blurPlaceholder.url;
+      }
+      
+      // Fallback to lowest quality for blur effect
+      const lowQuality = firstMedia.imageQualities.find(q => q.resolution === '320w') ||
+                        firstMedia.imageQualities.find(q => q.resolution === '480w') ||
+                        firstMedia.imageQualities.find(q => q.resolution === '640w') ||
+                        firstMedia.imageQualities[0];
+      
+      return lowQuality ? lowQuality.url : firstMedia.url || '/public/images/placeholder-project.jpg';
+    }
+    
+    // Fallback to thumbnail if available (fastest possible)
+    if (firstMedia.thumbnailUrl) {
+      return firstMedia.thumbnailUrl;
+    }
+    
+    return firstMedia.url || '/public/images/placeholder-project.jpg';
+  }
+
   // 🎯 SELECT IMAGE QUALITY (EXACT COPY FROM ADMIN PANEL)
   selectImageQuality(imageQualities, skipBlur = false) {
     if (!imageQualities || imageQualities.length === 0) {

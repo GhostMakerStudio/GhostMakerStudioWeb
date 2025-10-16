@@ -660,6 +660,17 @@ section {
   color: var(--text-gray);
 }
 
+/* 🎯 INVISIBLE EMPTY SLOTS - Maintain grid structure but hide visually */
+.portfolio-item.empty {
+  visibility: hidden;
+  /* Keep the grid positioning but make invisible */
+}
+
+.portfolio-item.empty .portfolio-cover {
+  /* Ensure the cover area is also invisible */
+  visibility: hidden;
+}
+
 .placeholder-icon {
   font-size: 3rem;
   margin-bottom: var(--spacing-sm);
