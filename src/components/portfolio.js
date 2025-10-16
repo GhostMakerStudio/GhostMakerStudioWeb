@@ -305,6 +305,12 @@ class PortfolioGallery {
       return null;
     }
     
+    // Ensure imageQualities is an array
+    if (!Array.isArray(imageQualities)) {
+      console.error('❌ imageQualities is not an array:', imageQualities);
+      return null;
+    }
+    
     // Sanitize and filter out invalid entries
     imageQualities = imageQualities.filter(q => q && q.quality);
     
