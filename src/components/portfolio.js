@@ -685,12 +685,12 @@ class PortfolioGallery {
             cursor: pointer;
           `;
           
-          // Add click handler to navigate to this image (don't create new modal)
+          // Add click handler to open this image in full viewer
           img.onclick = () => {
-            const modal = document.querySelector('.project-gallery-modal');
-            if (modal) {
-              this.updateMediaViewer(media, index, modal);
-            }
+            // Close the gallery modal first
+            this.closeMediaViewer();
+            // Open the image in full viewer
+            this.showMediaItem(media, index);
           };
           
           mediaItem.appendChild(img);
@@ -724,12 +724,12 @@ class PortfolioGallery {
             cursor: pointer;
           `;
           
-          // Add click handler to navigate to this video (don't create new modal)
+          // Add click handler to open this video in full viewer
           video.onclick = () => {
-            const modal = document.querySelector('.project-gallery-modal');
-            if (modal) {
-              this.updateMediaViewer(media, index, modal);
-            }
+            // Close the gallery modal first
+            this.closeMediaViewer();
+            // Open the video in full viewer
+            this.showMediaItem(media, index);
           };
           
           mediaItem.appendChild(video);
