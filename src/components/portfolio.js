@@ -189,6 +189,31 @@ class PortfolioGallery {
     console.log('📋 Grid items HTML:', gridItems.length, 'items created');
     console.log('📋 Portfolio grid innerHTML length:', portfolioGrid.innerHTML.length);
     console.log('📋 Portfolio grid children count:', portfolioGrid.children.length);
+    
+    // Debug: Check if any projects are actually visible
+    const portfolioItems = portfolioGrid.querySelectorAll('.portfolio-item');
+    console.log('🔍 Found', portfolioItems.length, 'portfolio-item elements');
+    
+    if (portfolioItems.length > 0) {
+      const firstItem = portfolioItems[0];
+      console.log('🔍 First portfolio item:', firstItem);
+      console.log('🔍 First item computed styles:', {
+        display: window.getComputedStyle(firstItem).display,
+        visibility: window.getComputedStyle(firstItem).visibility,
+        opacity: window.getComputedStyle(firstItem).opacity,
+        width: window.getComputedStyle(firstItem).width,
+        height: window.getComputedStyle(firstItem).height,
+        position: window.getComputedStyle(firstItem).position,
+        zIndex: window.getComputedStyle(firstItem).zIndex
+      });
+      
+      const firstImage = firstItem.querySelector('img');
+      if (firstImage) {
+        console.log('🔍 First image src:', firstImage.src);
+        console.log('🔍 First image loaded:', firstImage.complete);
+      }
+    }
+    
     console.log('✅ Portfolio grid rendered');
   }
 
