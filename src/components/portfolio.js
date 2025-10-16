@@ -38,35 +38,12 @@ class PortfolioGallery {
         console.log('📡 Response status: 200');
         console.log('📊 Projects data:', data);
         
-        // Find and extract grid layout configuration
-        const gridLayoutItem = data.projects.find(project => 
-          project.id === 'grid_layout' || project.type === 'grid_layout'
-        );
+        // Load projects first (already filtered by Lambda)
+        this.projects = data.projects;
         
-        if (gridLayoutItem && gridLayoutItem.layout) {
-          console.log('✅ Grid layout loaded:', gridLayoutItem.layout);
-          this.gridLayout = {
-            width: gridLayoutItem.layout.width || 3,
-            height: gridLayoutItem.layout.height || 3,
-            positions: gridLayoutItem.layout.positions || {},
-            sectionTitle: gridLayoutItem.layout.sectionTitle || 'Our Work'
-          };
-          
-          // Update the section title on the page
-          this.updateSectionTitle(this.gridLayout.sectionTitle);
-        } else {
-          console.log('⚠️ No grid layout found, using default');
-          this.gridLayout = { width: 3, height: 3, positions: {}, sectionTitle: 'Our Work' };
-          this.updateSectionTitle('Our Work');
-        }
+        // Then fetch grid layout separately (like admin panel)
+        await this.loadGridLayout();
         
-        // Filter out grid_layout and other non-project items
-        this.projects = data.projects.filter(project => 
-          project.id !== 'grid_layout' && 
-          project.type !== 'grid_layout' &&
-          project.title && 
-          project.title !== 'grid_layout'
-        );
         console.log('📁 Filtered projects array:', this.projects);
         console.log('📐 Using grid layout:', this.gridLayout);
         this.renderProjects();
@@ -95,6 +72,41 @@ class PortfolioGallery {
       }
       
       this.projects = [];
+    }
+  }
+
+  // 🎯 LOAD GRID LAYOUT (SEPARATE API CALL LIKE ADMIN PANEL)
+  async loadGridLayout() {
+    try {
+      console.log('🔄 Fetching grid layout from API Gateway...');
+      const gridLayoutResponse = await fetch('https://o7jiy71lw3.execute-api.us-east-1.amazonaws.com/prod/api/grid-layout');
+      console.log('📡 Grid layout response status:', gridLayoutResponse.status);
+      const gridLayoutItem = await gridLayoutResponse.json();
+      console.log('DEBUG: Received gridLayoutItem for main page:', gridLayoutItem);
+      console.log('DEBUG: gridLayoutItem.success:', gridLayoutItem.success);
+      console.log('DEBUG: gridLayoutItem.layout:', gridLayoutItem.layout);
+
+      if (gridLayoutItem && gridLayoutItem.success && gridLayoutItem.layout) {
+        console.log('✅ Grid layout loaded:', gridLayoutItem.layout);
+        this.gridLayout = {
+          width: gridLayoutItem.layout.width || 3,
+          height: gridLayoutItem.layout.height || 3,
+          positions: gridLayoutItem.layout.positions || {},
+          sectionTitle: gridLayoutItem.layout.sectionTitle || 'Our Work'
+        };
+        
+        // Update the section title on the page
+        this.updateSectionTitle(this.gridLayout.sectionTitle);
+      } else {
+        console.log('⚠️ No grid layout found, using default');
+        this.gridLayout = { width: 3, height: 3, positions: {}, sectionTitle: 'Our Work' };
+        this.updateSectionTitle('Our Work');
+      }
+    } catch (error) {
+      console.error('❌ Failed to load grid layout:', error);
+      console.log('⚠️ Using default grid layout due to error');
+      this.gridLayout = { width: 3, height: 3, positions: {}, sectionTitle: 'Our Work' };
+      this.updateSectionTitle('Our Work');
     }
   }
 
