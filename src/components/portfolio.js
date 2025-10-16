@@ -1055,10 +1055,10 @@ class PortfolioGallery {
     leftArrow.innerHTML = '‹';
     leftArrow.style.cssText = `
       position: absolute;
-      left: -60px;
+      left: 20px;
       top: 50%;
       transform: translateY(-50%);
-      background: rgba(255, 255, 255, 0.2);
+      background: rgba(0, 0, 0, 0.6);
       border: none;
       color: white;
       font-size: 24px;
@@ -1067,6 +1067,7 @@ class PortfolioGallery {
       border-radius: 50%;
       cursor: pointer;
       transition: all 0.3s ease;
+      z-index: 10;
     `;
     
     // Create right arrow
@@ -1074,10 +1075,10 @@ class PortfolioGallery {
     rightArrow.innerHTML = '›';
     rightArrow.style.cssText = `
       position: absolute;
-      right: -60px;
+      right: 20px;
       top: 50%;
       transform: translateY(-50%);
-      background: rgba(255, 255, 255, 0.2);
+      background: rgba(0, 0, 0, 0.6);
       border: none;
       color: white;
       font-size: 24px;
@@ -1086,6 +1087,7 @@ class PortfolioGallery {
       border-radius: 50%;
       cursor: pointer;
       transition: all 0.3s ease;
+      z-index: 10;
     `;
     
     // Create close button
