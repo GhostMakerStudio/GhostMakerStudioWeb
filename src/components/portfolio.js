@@ -123,10 +123,21 @@ class PortfolioGallery {
     const gridItems = [];
 
     // Create grid items using layout positions
+    // If no positions are defined, use first few projects as fallback
+    const hasPositions = Object.keys(this.gridLayout.positions).length > 0;
+    
     for (let i = 0; i < this.gridLayout.width * this.gridLayout.height; i++) {
       const gridPosition = i;
-      const projectId = this.gridLayout.positions[gridPosition];
-      const project = projectId ? this.projects.find(p => p.id === projectId) : null;
+      let project = null;
+      
+      if (hasPositions) {
+        // Use grid layout positions
+        const projectId = this.gridLayout.positions[gridPosition];
+        project = projectId ? this.projects.find(p => p.id === projectId) : null;
+      } else {
+        // Fallback: use projects in order
+        project = this.projects[i] || null;
+      }
 
       if (project) {
         // Project exists at this position according to grid layout

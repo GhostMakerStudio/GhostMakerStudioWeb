@@ -5926,9 +5926,27 @@
             const height = parseInt(document.getElementById('gridHeight').value);
             const sectionTitle = document.getElementById('sectionTitle').value;
             
-            // Clear ALL existing projects from grid and move them back to unused
-            const projectsMoved = Object.keys(gridLayout.positions).length;
-            gridLayout.positions = {}; // Clear all positions
+            // Only clear positions if grid dimensions actually changed
+            const oldWidth = gridLayout.width;
+            const oldHeight = gridLayout.height;
+            const projectsMoved = 0;
+            
+            // Only clear positions if grid size changed significantly
+            if (width !== oldWidth || height !== oldHeight) {
+                // Clear positions that are outside the new grid bounds
+                const newMaxPosition = (width * height) - 1;
+                const positionsToRemove = [];
+                
+                for (const [position, projectId] of Object.entries(gridLayout.positions)) {
+                    if (parseInt(position) > newMaxPosition) {
+                        positionsToRemove.push(position);
+                    }
+                }
+                
+                positionsToRemove.forEach(position => {
+                    delete gridLayout.positions[position];
+                });
+            }
             
             // Update grid dimensions
             gridLayout.width = width;
