@@ -215,6 +215,15 @@ class PortfolioGallery {
     }
     
     console.log('✅ Portfolio grid rendered');
+    
+    // Trigger fade-in animation for portfolio items
+    setTimeout(() => {
+      const portfolioItems = portfolioGrid.querySelectorAll('.portfolio-item');
+      portfolioItems.forEach(item => {
+        item.classList.add('fade-in');
+        console.log('🎬 Added fade-in class to portfolio item');
+      });
+    }, 100);
   }
 
   // 🎯 GET PROJECT COVER IMAGE (EXACT COPY FROM ADMIN PANEL)
