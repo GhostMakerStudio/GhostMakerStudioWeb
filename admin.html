@@ -1907,6 +1907,85 @@
         function getCachedImage(url) {
             return imageCache.get(url) || null;
         }
+
+        // Smart loading configuration based on device and connection
+        function getSmartLoadingConfig() {
+            const deviceInfo = detectDevice();
+            const connectionInfo = detectConnection();
+            
+            console.log(`📱 Device: ${deviceInfo.type} (${deviceInfo.width}x${deviceInfo.height})`);
+            console.log(`🌐 Connection: ${connectionInfo.type} (${connectionInfo.effectiveType || 'unknown'})`);
+            
+            // Mobile + Slow connection = Minimal loading
+            if (deviceInfo.type === 'mobile' && (connectionInfo.type === 'slow' || connectionInfo.type === 'very-slow')) {
+                return {
+                    name: 'minimal',
+                    preloadCount: 8, // Admin panel needs more for management
+                    quality: '480w',
+                    blurFirst: true,
+                    lazyLoad: true
+                };
+            }
+            
+            // Mobile + Fast connection = Balanced loading
+            if (deviceInfo.type === 'mobile' && connectionInfo.type === 'fast') {
+                return {
+                    name: 'balanced',
+                    preloadCount: 16, // More for admin panel
+                    quality: '960w',
+                    blurFirst: true,
+                    lazyLoad: true
+                };
+            }
+            
+            // Desktop = Aggressive loading (but still limited)
+            return {
+                name: 'aggressive',
+                preloadCount: 32, // Reasonable limit even for desktop admin
+                quality: '1920w',
+                blurFirst: false,
+                lazyLoad: false
+            };
+        }
+
+        function detectDevice() {
+            const width = window.innerWidth;
+            const height = window.innerHeight;
+            const userAgent = navigator.userAgent.toLowerCase();
+            
+            let type = 'desktop';
+            if (width <= 768) {
+                type = userAgent.includes('iphone') || userAgent.includes('ipad') ? 'mobile' : 'mobile';
+            } else if (width <= 1024) {
+                type = 'tablet';
+            }
+            
+            return { type, width, height };
+        }
+
+        function detectConnection() {
+            const connection = navigator.connection || navigator.mozConnection || navigator.webkitConnection;
+            
+            if (!connection) {
+                return { type: 'unknown', effectiveType: 'unknown' };
+            }
+            
+            let type = 'slow';
+            if (connection.effectiveType) {
+                if (connection.effectiveType === '4g' || connection.effectiveType === '3g') {
+                    type = 'fast';
+                } else if (connection.effectiveType === '2g') {
+                    type = 'very-slow';
+                }
+            }
+            
+            return { 
+                type, 
+                effectiveType: connection.effectiveType,
+                downlink: connection.downlink,
+                rtt: connection.rtt
+            };
+        }
         
         function preloadImage(url) {
             return new Promise((resolve, reject) => {
@@ -3279,46 +3358,41 @@
                 }
             });
             
-            console.log(`🖼️ Aggressively preloading ${imageUrls.length} media thumbnails across all projects...`);
+            // Smart loading based on device and connection
+            const smartLoadingConfig = getSmartLoadingConfig();
+            console.log(`🚀 Smart loading: ${smartLoadingConfig.name} strategy for ${imageUrls.length} total images`);
+            
+            // Only preload a subset based on strategy
+            const imagesToPreload = imageUrls.slice(0, smartLoadingConfig.preloadCount);
+            console.log(`🎯 Preloading ${imagesToPreload.length} visible images with ${smartLoadingConfig.quality} quality`);
             
             // Show preloading progress
-            if (imageUrls.length > 0) {
-                showPreloadProgress(imageUrls.length);
+            if (imagesToPreload.length > 0) {
+                showPreloadProgress(imagesToPreload.length);
             }
             
-            // Preload images in larger batches for faster loading
-            const batchSize = 10; // Increased batch size for faster loading
+            // Preload only the selected images
             let loadedCount = 0;
-            
-            for (let i = 0; i < imageUrls.length; i += batchSize) {
-                const batch = imageUrls.slice(i, i + batchSize);
-                await Promise.all(batch.map(url => {
-                    return new Promise((resolve) => {
-                        const img = new Image();
-                        img.onload = () => {
-                            // Cache the image immediately for instant access
-                            cacheImage(url, img);
-                            loadedCount++;
-                            updatePreloadProgress(loadedCount, imageUrls.length);
-                            resolve(url);
-                        };
-                        img.onerror = () => {
-                            loadedCount++;
-                            updatePreloadProgress(loadedCount, imageUrls.length);
-                            resolve(url); // Still resolve even if image fails
-                        };
-                        img.src = url;
-                    });
-                }));
-                
-                // Small delay between batches to prevent overwhelming the browser
-                if (i + batchSize < imageUrls.length) {
-                    await new Promise(resolve => setTimeout(resolve, 50));
-                }
-            }
+            await Promise.all(imagesToPreload.map(url => {
+                return new Promise((resolve) => {
+                    const img = new Image();
+                    img.onload = () => {
+                        cacheImage(url, img);
+                        loadedCount++;
+                        updatePreloadProgress(loadedCount, imagesToPreload.length);
+                        resolve(url);
+                    };
+                    img.onerror = () => {
+                        loadedCount++;
+                        updatePreloadProgress(loadedCount, imagesToPreload.length);
+                        resolve(url); // Still resolve even if image fails
+                    };
+                    img.src = url;
+                });
+            }));
             
             hidePreloadProgress();
-            console.log(`✅ Aggressively preloaded and cached ${imageUrls.length} thumbnails for instant gallery loading`);
+            console.log(`✅ Smart preloaded ${imagesToPreload.length} thumbnails (${imageUrls.length - imagesToPreload.length} remaining for lazy load)`);
         }
         
         function showPreloadProgress(totalImages) {
