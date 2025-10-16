@@ -571,6 +571,9 @@ class PortfolioGallery {
 
   // 🎨 SHOW PROJECT GALLERY (EXACT COPY FROM ADMIN PANEL)
   showProjectGallery(project) {
+    // Close any existing modal first to prevent stacking
+    this.closeMediaViewer();
+    
     // Create modal overlay - EXACT same as admin panel
     const modal = document.createElement('div');
     modal.className = 'project-gallery-modal';
@@ -1143,9 +1146,15 @@ class PortfolioGallery {
 
   // 🚪 CLOSE MEDIA VIEWER
   closeMediaViewer() {
-    const modal = document.querySelector('.media-viewer-modal');
-    if (modal) {
-      modal.remove();
+    // Close both possible modal types to be safe
+    const galleryModal = document.querySelector('.project-gallery-modal');
+    const viewerModal = document.querySelector('.media-viewer-modal');
+    
+    if (galleryModal) {
+      galleryModal.remove();
+    }
+    if (viewerModal) {
+      viewerModal.remove();
     }
   }
 
