@@ -1018,12 +1018,27 @@ class PortfolioGallery {
   // 🔄 UPDATE MEDIA VIEWER (FIX: Update existing viewer with full Facebook-style loading)
   updateMediaViewer(media, index, modal) {
     console.log(`🔄 Updating media viewer to index ${index}:`, media.filename || media.alt);
+    console.log('🔍 Modal element:', modal);
     
     const mediaContainer = modal.querySelector('.media-viewer-container');
+    console.log('🔍 Media container found:', mediaContainer);
+    
+    if (!mediaContainer) {
+      console.error('❌ Media container not found! Cannot update viewer.');
+      return;
+    }
+    
     const mediaElement = mediaContainer.querySelector('img, video');
     const counter = mediaContainer.querySelector('div');
     const leftArrow = mediaContainer.querySelector('button:nth-of-type(1)');
     const rightArrow = mediaContainer.querySelector('button:nth-of-type(2)');
+    
+    console.log('🔍 Elements found:', {
+      mediaElement: !!mediaElement,
+      counter: !!counter,
+      leftArrow: !!leftArrow,
+      rightArrow: !!rightArrow
+    });
     
     // Add full Facebook-style loading like admin panel
     console.log(`🚀 Starting aggressive preloading around index ${index} (total: ${this.currentProject.content.length})`);
@@ -1069,54 +1084,35 @@ class PortfolioGallery {
       }
     }
     
-    // Update media element with ACTUAL Facebook-style loading
-    if (media.type === 'image') {
-      // Start with blur image for progressive loading
-      const blurImage = this.getProjectBlurImage({ content: [media] });
-      const highQualityImage = this.getProjectCoverImage({ content: [media] });
+    // Update media element - SIMPLIFIED VERSION FIRST
+    if (media.type === 'image' && mediaElement) {
+      console.log('🖼️ Updating image element with new media');
       
-      if (blurImage && highQualityImage && blurImage !== highQualityImage) {
-        // ACTUAL progressive loading: start with blur, then upgrade
-        mediaElement.src = blurImage;
-        mediaElement.style.filter = 'blur(20px)';
-        mediaElement.style.transform = 'scale(1.1)';
-        mediaElement.style.transition = 'filter 0.3s ease-out, transform 0.3s ease-out';
+      // Get the high quality image URL
+      const highQualityImage = this.getProjectCoverImage({ content: [media] });
+      console.log('🖼️ High quality image URL:', highQualityImage);
+      
+      if (highQualityImage) {
+        // Simple direct update first to test navigation
+        mediaElement.src = highQualityImage;
         mediaElement.alt = media.filename || 'Media item';
+        mediaElement.style.filter = 'none';
+        mediaElement.style.transform = 'scale(1)';
+        mediaElement.style.opacity = '1';
         
-        // Preload high quality image
-        const highQualityImg = new Image();
-        highQualityImg.onload = () => {
-          console.log(`🚀 Image loaded - starting Facebook-style blur-up`);
-          console.log(`📊 Progressive loading for media ${index} - Current: blur_placeholder`);
-          console.log(`🔍 Available image qualities: (${media.imageQualities ? media.imageQualities.length : 0})`, media.imageQualities);
-          
-          // ACTUAL blur removal
-          mediaElement.style.filter = 'blur(0px)';
-          mediaElement.style.transform = 'scale(1)';
-          
-          setTimeout(() => {
-            // ACTUAL image swap
-            mediaElement.style.transition = 'opacity 0.2s ease-in-out';
-            mediaElement.style.opacity = '0.5';
-            
-            setTimeout(() => {
-              mediaElement.src = highQualityImage;
-              mediaElement.style.opacity = '1';
-              console.log(`✅ Already at high quality (1920w) - removing blur`);
-              console.log(`🎉 Successfully upgraded to 1920w with smooth transition!`);
-              console.log(`✅ Progressive loading complete for media ${index}!`);
-            }, 100);
-          }, 300);
-        };
-        highQualityImg.src = highQualityImage;
+        console.log('✅ Image updated successfully');
       } else {
-        // Fallback: direct high quality
-        mediaElement.src = media.url;
-        mediaElement.alt = media.filename || 'Media item';
-        console.log(`🖼️ Starting with high quality (no blur): 1920w (${media.url})`);
+        console.error('❌ No image URL found for media:', media);
       }
-    } else if (media.type === 'video') {
+    } else if (media.type === 'video' && mediaElement) {
+      console.log('🎥 Updating video element with new media');
       mediaElement.src = media.url;
+      mediaElement.load();
+    } else {
+      console.error('❌ Cannot update media - missing element or unsupported type:', {
+        type: media.type,
+        hasElement: !!mediaElement
+      });
     }
     
     // Update counter
