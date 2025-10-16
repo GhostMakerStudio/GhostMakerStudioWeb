@@ -186,6 +186,9 @@ class PortfolioGallery {
     
     console.log('📋 Portfolio grid element:', portfolioGrid);
     console.log('📊 Rendering', this.projects.length, 'projects');
+    console.log('📋 Grid items HTML:', gridItems.length, 'items created');
+    console.log('📋 Portfolio grid innerHTML length:', portfolioGrid.innerHTML.length);
+    console.log('📋 Portfolio grid children count:', portfolioGrid.children.length);
     console.log('✅ Portfolio grid rendered');
   }
 
