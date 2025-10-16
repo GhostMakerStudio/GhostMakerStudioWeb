@@ -389,32 +389,9 @@ class PortfolioGallery {
       return;
     }
     
-    // Add aggressive preloading like admin panel
-    console.log(`🖼️ Aggressively preloading media thumbnails across all projects...`);
-    this.projects.forEach(project => {
-      if (project.content) {
-        project.content.forEach((media, index) => {
-          if (media.type === 'image' && media.thumbnailUrl) {
-            console.log(`🖼️ Gallery thumbnail ${index}: ${media.type} - Using URL: ${media.thumbnailUrl} (thumbnailUrl: ${media.thumbnailUrl})`);
-            console.log(`🔍 Item URLs available: ${media.urls ? 'YES' : 'undefined'}`);
-            console.log(`🔍 HLS URL: ${media.hlsUrl || 'undefined'}`);
-            
-            // Preload and cache
-            if (this.imageCache.has(media.thumbnailUrl)) {
-              console.log(`✅ Thumbnail ${index} already cached`);
-            } else {
-              const preloadImg = new Image();
-              preloadImg.onload = () => {
-                this.imageCache.set(media.thumbnailUrl, preloadImg);
-                console.log(`✅ Thumbnail ${index} cached`);
-              };
-              preloadImg.src = media.thumbnailUrl;
-            }
-          }
-        });
-      }
-    });
-    console.log(`✅ Aggressively preloaded and cached thumbnails for instant gallery loading`);
+    // Smart Facebook-style loading: Only preload visible items + device optimization
+    console.log(`🚀 Smart loading: Detecting device and connection...`);
+    this.setupSmartLoading();
     console.log(`🔄 Initialized local project state with ${this.projects.length} items`);
     
     // Prevent infinite loop - check if already processing or completed
@@ -1321,6 +1298,211 @@ class PortfolioGallery {
     // Add any event listeners needed
     console.log('🎯 Event listeners setup complete');
     console.log('✅ Portfolio Gallery ready!');
+  }
+
+  // 🚀 SMART FACEBOOK-STYLE LOADING SYSTEM
+  setupSmartLoading() {
+    // Detect device and connection
+    const deviceInfo = this.detectDevice();
+    const connectionInfo = this.detectConnection();
+    
+    console.log(`📱 Device: ${deviceInfo.type} (${deviceInfo.width}x${deviceInfo.height})`);
+    console.log(`🌐 Connection: ${connectionInfo.type} (${connectionInfo.effectiveType || 'unknown'})`);
+    
+    // Set loading strategy based on device and connection
+    this.loadingStrategy = this.determineLoadingStrategy(deviceInfo, connectionInfo);
+    console.log(`⚡ Loading Strategy: ${this.loadingStrategy.name}`);
+    
+    // Setup intersection observer for lazy loading
+    this.setupLazyLoading();
+    
+    // Preload only visible items with appropriate quality
+    this.preloadVisibleItems();
+  }
+
+  detectDevice() {
+    const width = window.innerWidth;
+    const height = window.innerHeight;
+    const userAgent = navigator.userAgent.toLowerCase();
+    
+    let type = 'desktop';
+    if (width <= 768) {
+      type = userAgent.includes('iphone') || userAgent.includes('ipad') ? 'mobile' : 'mobile';
+    } else if (width <= 1024) {
+      type = 'tablet';
+    }
+    
+    return { type, width, height };
+  }
+
+  detectConnection() {
+    const connection = navigator.connection || navigator.mozConnection || navigator.webkitConnection;
+    
+    if (!connection) {
+      return { type: 'unknown', effectiveType: 'unknown' };
+    }
+    
+    let type = 'slow';
+    if (connection.effectiveType) {
+      if (connection.effectiveType === '4g' || connection.effectiveType === '3g') {
+        type = 'fast';
+      } else if (connection.effectiveType === '2g') {
+        type = 'very-slow';
+      }
+    }
+    
+    return { 
+      type, 
+      effectiveType: connection.effectiveType,
+      downlink: connection.downlink,
+      rtt: connection.rtt
+    };
+  }
+
+  determineLoadingStrategy(device, connection) {
+    // Mobile + Slow connection = Minimal loading
+    if (device.type === 'mobile' && (connection.type === 'slow' || connection.type === 'very-slow')) {
+      return {
+        name: 'minimal',
+        preloadCount: 2,
+        quality: '480w',
+        blurFirst: true,
+        lazyLoad: true
+      };
+    }
+    
+    // Mobile + Fast connection = Balanced loading
+    if (device.type === 'mobile' && connection.type === 'fast') {
+      return {
+        name: 'balanced',
+        preloadCount: 4,
+        quality: '960w',
+        blurFirst: true,
+        lazyLoad: true
+      };
+    }
+    
+    // Desktop = Aggressive loading
+    return {
+      name: 'aggressive',
+      preloadCount: 8,
+      quality: '1920w',
+      blurFirst: false,
+      lazyLoad: false
+    };
+  }
+
+  setupLazyLoading() {
+    if (!this.loadingStrategy.lazyLoad) {
+      console.log('🚀 No lazy loading needed - aggressive strategy');
+      return;
+    }
+    
+    console.log('👁️ Setting up lazy loading for visible items only');
+    
+    // Create intersection observer for lazy loading
+    this.imageObserver = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          this.loadImageForElement(entry.target);
+          this.imageObserver.unobserve(entry.target);
+        }
+      });
+    }, {
+      rootMargin: '50px' // Start loading 50px before element is visible
+    });
+  }
+
+  preloadVisibleItems() {
+    console.log(`🎯 Preloading ${this.loadingStrategy.preloadCount} visible items with ${this.loadingStrategy.quality} quality`);
+    
+    let loadedCount = 0;
+    this.projects.forEach(project => {
+      if (project.content && loadedCount < this.loadingStrategy.preloadCount) {
+        project.content.forEach((media, index) => {
+          if (media.type === 'image' && loadedCount < this.loadingStrategy.preloadCount) {
+            this.preloadImage(media, this.loadingStrategy.quality);
+            loadedCount++;
+          }
+        });
+      }
+    });
+  }
+
+  preloadImage(media, targetQuality) {
+    const quality = this.selectImageQuality(media, targetQuality);
+    if (!quality) return;
+    
+    const imageUrl = quality.url || quality;
+    console.log(`📸 Preloading: ${quality.resolution || targetQuality} for ${media.filename || 'image'}`);
+    
+    if (this.imageCache.has(imageUrl)) {
+      console.log(`✅ Already cached: ${imageUrl}`);
+      return;
+    }
+    
+    const img = new Image();
+    img.onload = () => {
+      this.imageCache.set(imageUrl, img);
+      console.log(`✅ Cached: ${imageUrl}`);
+    };
+    img.src = imageUrl;
+  }
+
+  loadImageForElement(element) {
+    const projectId = element.dataset.projectId;
+    const mediaIndex = parseInt(element.dataset.mediaIndex);
+    
+    if (!projectId || isNaN(mediaIndex)) return;
+    
+    const project = this.projects.find(p => p.id === projectId);
+    if (!project || !project.content[mediaIndex]) return;
+    
+    const media = project.content[mediaIndex];
+    if (media.type !== 'image') return;
+    
+    console.log(`👁️ Lazy loading image for ${projectId} media ${mediaIndex}`);
+    
+    // Load with blur-up effect if strategy calls for it
+    if (this.loadingStrategy.blurFirst) {
+      this.loadWithBlurUp(element, media);
+    } else {
+      this.loadDirect(element, media);
+    }
+  }
+
+  loadWithBlurUp(element, media) {
+    console.log(`🌫️ Loading with blur-up effect for ${media.filename}`);
+    
+    // First load a tiny blur image
+    const blurUrl = this.getProjectBlurImage(media);
+    if (blurUrl) {
+      element.src = blurUrl;
+      element.style.filter = 'blur(5px)';
+      element.style.transition = 'filter 0.3s ease';
+    }
+    
+    // Then load the actual quality
+    const quality = this.selectImageQuality(media, this.loadingStrategy.quality);
+    if (quality && quality.url) {
+      const finalImg = new Image();
+      finalImg.onload = () => {
+        element.src = quality.url;
+        element.style.filter = 'none';
+        this.imageCache.set(quality.url, finalImg);
+      };
+      finalImg.src = quality.url;
+    }
+  }
+
+  loadDirect(element, media) {
+    console.log(`⚡ Direct loading for ${media.filename}`);
+    
+    const quality = this.selectImageQuality(media, this.loadingStrategy.quality);
+    if (quality && quality.url) {
+      element.src = quality.url;
+      this.imageCache.set(quality.url, element);
+    }
   }
 }
 
