@@ -1257,8 +1257,10 @@ class PortfolioGallery {
         console.log('🔄 After update - new src:', mediaElement.src);
         console.log('✅ Image updated successfully');
         
-        // Force a reload in case of caching issues
-        mediaElement.load();
+        // Force a reload in case of caching issues (only for video elements)
+        if (media.type === 'video') {
+          mediaElement.load();
+        }
       } else {
         console.error('❌ No image URL found for media:', media);
       }
