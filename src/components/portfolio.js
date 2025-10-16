@@ -689,8 +689,8 @@ class PortfolioGallery {
           img.onclick = () => {
             // Close the gallery modal first
             this.closeMediaViewer();
-            // Open the image in full viewer
-            this.showMediaItem(media, index);
+            // Create and open the media viewer
+            this.createAndShowMediaViewer(media, index);
           };
           
           mediaItem.appendChild(img);
@@ -728,8 +728,8 @@ class PortfolioGallery {
           video.onclick = () => {
             // Close the gallery modal first
             this.closeMediaViewer();
-            // Open the video in full viewer
-            this.showMediaItem(media, index);
+            // Create and open the media viewer
+            this.createAndShowMediaViewer(media, index);
           };
           
           mediaItem.appendChild(video);
@@ -982,6 +982,147 @@ class PortfolioGallery {
         this.closeMediaViewer();
       }
     });
+  }
+
+  // 🖼️ CREATE AND SHOW MEDIA VIEWER (NEW METHOD)
+  createAndShowMediaViewer(media, index) {
+    console.log('🖼️ Creating media viewer for:', media.filename || media.alt);
+    
+    // Create modal - EXACT same as admin panel
+    const modal = document.createElement('div');
+    modal.className = 'media-viewer-modal';
+    modal.style.cssText = `
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0, 0, 0, 0.9);
+      z-index: 1000;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      backdrop-filter: blur(10px);
+    `;
+    
+    // Create media container - EXACT same as admin panel
+    const mediaContainer = document.createElement('div');
+    mediaContainer.className = 'media-viewer-container';
+    mediaContainer.style.cssText = `
+      position: relative;
+      max-width: 95vw;
+      max-height: 95vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    `;
+    
+    // Create media element
+    let mediaElement;
+    if (media.type === 'image') {
+      mediaElement = document.createElement('img');
+      mediaElement.style.cssText = `
+        max-width: 100%;
+        max-height: 100%;
+        object-fit: contain;
+        border-radius: 8px;
+      `;
+    } else if (media.type === 'video') {
+      mediaElement = document.createElement('video');
+      mediaElement.controls = true;
+      mediaElement.style.cssText = `
+        max-width: 100%;
+        max-height: 100%;
+        border-radius: 8px;
+      `;
+    }
+    
+    // Create counter
+    const counter = document.createElement('div');
+    counter.style.cssText = `
+      position: absolute;
+      top: -40px;
+      left: 0;
+      color: white;
+      font-size: 14px;
+      background: rgba(0, 0, 0, 0.7);
+      padding: 5px 10px;
+      border-radius: 4px;
+    `;
+    
+    // Create left arrow
+    const leftArrow = document.createElement('button');
+    leftArrow.innerHTML = '‹';
+    leftArrow.style.cssText = `
+      position: absolute;
+      left: -60px;
+      top: 50%;
+      transform: translateY(-50%);
+      background: rgba(255, 255, 255, 0.2);
+      border: none;
+      color: white;
+      font-size: 24px;
+      width: 50px;
+      height: 50px;
+      border-radius: 50%;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    `;
+    
+    // Create right arrow
+    const rightArrow = document.createElement('button');
+    rightArrow.innerHTML = '›';
+    rightArrow.style.cssText = `
+      position: absolute;
+      right: -60px;
+      top: 50%;
+      transform: translateY(-50%);
+      background: rgba(255, 255, 255, 0.2);
+      border: none;
+      color: white;
+      font-size: 24px;
+      width: 50px;
+      height: 50px;
+      border-radius: 50%;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    `;
+    
+    // Create close button
+    const closeButton = document.createElement('button');
+    closeButton.innerHTML = '×';
+    closeButton.style.cssText = `
+      position: absolute;
+      top: -40px;
+      right: 0;
+      background: rgba(255, 255, 255, 0.2);
+      border: none;
+      color: white;
+      font-size: 24px;
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    `;
+    
+    // Assemble the modal
+    mediaContainer.appendChild(mediaElement);
+    mediaContainer.appendChild(counter);
+    mediaContainer.appendChild(leftArrow);
+    mediaContainer.appendChild(rightArrow);
+    mediaContainer.appendChild(closeButton);
+    modal.appendChild(mediaContainer);
+    document.body.appendChild(modal);
+    
+    // Set up close handler
+    closeButton.onclick = () => this.closeMediaViewer();
+    modal.onclick = (e) => {
+      if (e.target === modal) this.closeMediaViewer();
+    };
+    
+    // Now call showMediaItem to populate the modal
+    this.showMediaItem(media, index, modal);
   }
 
   // 🖼️ SHOW MEDIA ITEM (EXACT COPY FROM ADMIN PANEL)
