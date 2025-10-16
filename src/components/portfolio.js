@@ -685,8 +685,13 @@ class PortfolioGallery {
             cursor: pointer;
           `;
           
-          // Add click handler to open image in full view
-          img.onclick = () => this.openMediaViewer(media, index);
+          // Add click handler to navigate to this image (don't create new modal)
+          img.onclick = () => {
+            const modal = document.querySelector('.project-gallery-modal');
+            if (modal) {
+              this.updateMediaViewer(media, index, modal);
+            }
+          };
           
           mediaItem.appendChild(img);
           
@@ -719,8 +724,13 @@ class PortfolioGallery {
             cursor: pointer;
           `;
           
-          // Add click handler to open video in full view
-          video.onclick = () => this.openMediaViewer(media, index);
+          // Add click handler to navigate to this video (don't create new modal)
+          video.onclick = () => {
+            const modal = document.querySelector('.project-gallery-modal');
+            if (modal) {
+              this.updateMediaViewer(media, index, modal);
+            }
+          };
           
           mediaItem.appendChild(video);
           
@@ -1094,13 +1104,20 @@ class PortfolioGallery {
       
       if (highQualityImage) {
         // Simple direct update first to test navigation
+        console.log('🔄 Before update - current src:', mediaElement.src);
+        console.log('🔄 Setting new src to:', highQualityImage);
+        
         mediaElement.src = highQualityImage;
         mediaElement.alt = media.filename || 'Media item';
         mediaElement.style.filter = 'none';
         mediaElement.style.transform = 'scale(1)';
         mediaElement.style.opacity = '1';
         
+        console.log('🔄 After update - new src:', mediaElement.src);
         console.log('✅ Image updated successfully');
+        
+        // Force a reload in case of caching issues
+        mediaElement.load();
       } else {
         console.error('❌ No image URL found for media:', media);
       }
